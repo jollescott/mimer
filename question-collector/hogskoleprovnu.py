@@ -25,7 +25,7 @@ def getYears():
 
 
 async def getQuestions(url):
-    browser = await launch()
+    browser = await launch({ 'args': ['--no-sandbox', '--disable-setuid-sandbox'] })
     page = await browser.newPage()
 
     await page.goto(url)
@@ -63,8 +63,7 @@ async def getQuestions(url):
 
         questions.append(question)
 
-if __name__ == "__main__":
-    links = getYears()
+    await browser.close()
 
-    for link in links:
-        asyncio.get_event_loop().run_until_complete(getQuestions(link))
+links = getYears()
+asyncio.run(getQuestions(links[0]))
