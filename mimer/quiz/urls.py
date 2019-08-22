@@ -10,5 +10,6 @@ urlpatterns = [
     path('logout', views.logout, name='logout'),
     path('train', views.train, name='train'),
     path('test', views.test, name='test'),
-    path('test/<int:test>/<int:question>', views.question, name='question')
+    path('test/<int:tid>/<int:qid>', views.question, name='question'),
+    path('answer/<int:tid>/<int:qid>/<int:a>', views.answer, name='answer')
 ]

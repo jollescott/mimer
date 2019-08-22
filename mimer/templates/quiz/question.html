@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+
+{% load static %}
+<link rel="stylesheet" href="{% static 'quiz/question.css' %}">
+
+{% endblock %}
+
+{% block content %}
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Test</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+        </ul>
+        <div class="form-inline my-2 my-lg-0">
+            <a href="/home" class="btn btn-outline-danger my-2 my-sm-0" type="submit">Quit</a>
+        </form>
+    </div>
+</nav>
+
+<div style="margin: 10px">
+    <h2>{{ text }} </h2>
+    <div>
+        <a href="/answer/{{ test_id }}/{{ question_id }}/0" class="btn btn-primary" style="margin: 5px">{{ answer_a }}</a>
+        <a href="/answer/{{ test_id }}/{{ question_id }}/1" class="btn btn-primary" style="margin: 5px">{{ answer_b }}</a>
+        <a href="/answer/{{ test_id }}/{{ question_id }}/2" class="btn btn-primary" style="margin: 5px">{{ answer_c }}</a>
+        <a href="/answer/{{ test_id }}/{{ question_id }}/3" class="btn btn-primary" style="margin: 5px">{{ answer_d }}</a>
+    </div>
+</div>
+
+{% endblock %}
