@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 # Create your views here.
 from django.http import HttpResponse
 import django.contrib.auth
+from . import models
 
 def index(request):
     if request.user.is_authenticated:
@@ -37,4 +38,15 @@ def logout(request):
     return redirect('index')
 
 def home(request):
-    return render(request, 'quiz/home.html')
+    user_id = request.user.id
+
+    if user_id is None:
+        return redirect('index')
+
+    user = models.QuizUser.objects.get(id=user_id)
+    
+    context = {
+        'overall_score': user.overall_score
+    }
+
+    return render(request, 'quiz/home.html', context=context)

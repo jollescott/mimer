@@ -20,9 +20,20 @@
         <ul class="navbar-nav mr-auto">
         </ul>
         <div class="form-inline my-2 my-lg-0">
-            <a href="/logout" class="btn btn-outline-success my-2 my-sm-0" type="submit"><p>Logout</p></a>
+            <a href="/logout" class="btn btn-outline-danger my-2 my-sm-0" type="submit">Logout</a>
         </form>
     </div>
 </nav>
+
+<div style="margin: 10px">
+    <h2>Your score: {{ overall_score }} </h2>
+    <div>
+        <a href="/test" class="btn btn-primary" style="float: left; margin: 5px">Test</a>
+        <a href="/train" class="btn btn-secondary" style="float: left; margin: 5px">Train</a>
+    </div>
+
+    <p style="clear: both;">Test runs does not count into your overall score.</p>
+
+</div>
 
 {% endblock %}
