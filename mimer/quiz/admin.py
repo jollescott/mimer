@@ -3,3 +3,5 @@ from . import models
 
 # Register your models here.
 admin.site.register(models.QuizUser)
+admin.site.register(models.Test)
+admin.site.register(models.Question)
