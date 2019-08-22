@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+
+{% load static %}
+<link rel="stylesheet" href="{% static 'quiz/home.css' %}">
+
+{% endblock %}
+
+{% block content %}
+
+<div>
+    <a href="/logout"><p>Logout</p></a>
+</div>
+
+{% endblock %}
