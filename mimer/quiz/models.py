@@ -23,6 +23,7 @@ class Question(models.Model):
 class Test(models.Model):
     questions = models.ManyToManyField(Question)
     user = models.ForeignKey(QuizUser, on_delete=models.CASCADE)
+    train = models.BooleanField(default=True)
 
     def __str__(self):
         return "{0} {1}".format(self.user, self.id)
