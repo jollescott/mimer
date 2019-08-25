@@ -7,7 +7,7 @@ import json
 
 def add_questions(apps, schema_editor):
     if os.path.isfile('./questions.json'):
-        questions_file = open('./questions.json', 'w')
+        questions_file = open('./questions.json', 'r')
         questions_json = questions_file.read()
 
         questions = json.loads(questions_json)
@@ -16,14 +16,14 @@ def add_questions(apps, schema_editor):
 
         for question in questions:
             model = Question()
-            model.text = question.text
-            model.correct = question.correct
+            model.text = question['text']
+            model.correct = question['correct']
 
-            model.answer_a = question.alternatives[0]
-            model.answer_b = question.alternatives[1]
-            model.answer_c = question.alternatives[2]
-            model.answer_d = question.alternatives[3]
-            model.answer_e = question.alternatives[4]
+            model.answer_a = question['alternatives'][0]
+            model.answer_b = question['alternatives'][1]
+            model.answer_c = question['alternatives'][2]
+            model.answer_d = question['alternatives'][3]
+            model.answer_e = question['alternatives'][4]
 
             model.save()
 
