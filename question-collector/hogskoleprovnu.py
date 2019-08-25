@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
-import re
+import re, json
 
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -87,11 +87,17 @@ def main():
     options.add_argument('no-sandbox')
 
     driver = webdriver.Chrome(chrome_options=options)
+    all_questions = []
 
     for year in years:
         questions = getQuestions(year, driver)
+        all_questions.extend(questions)
 
     driver.close()
+
+    questions_json = json.dumps(all_questions)
+    result_file = open('questions.json', 'w')
+    result_file.write(questions_json)
 
 if __name__ == "__main__":
     main()
