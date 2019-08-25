@@ -24,7 +24,7 @@ RUN apt-get update \
     && apt-get -y install --no-install-recommends apt-utils dialog 2>&1 \
     #
     # Verify git, process tools, lsb-release (common in install instructions for CLIs) installed
-    && apt-get -y install git procps lsb-release libx11-xcb-dev \
+    && apt-get -y install git procps lsb-release chromium chromium-driver \
     #
     # Install pylint
     && pip --disable-pip-version-check --no-cache-dir install pylint \

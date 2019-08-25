@@ -1,8 +1,12 @@
 from bs4 import BeautifulSoup
 import requests
 import re
-from pyppeteer import launch
-import asyncio
+
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException
 
 BASE_URL = 'https://www.högskoleprovet.nu/ord'
 
@@ -24,46 +28,70 @@ def getYears():
         return None
 
 
-async def getQuestions(url):
-    browser = await launch({ 'args': ['--no-sandbox', '--disable-setuid-sandbox'] })
-    page = await browser.newPage()
+def getQuestions(url, driver):
+    driver.get(url)
 
-    await page.goto(url)
-    await page.click('button#btn-success')
+    try:
+        start_btn = WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.CLASS_NAME, 'btn-success')))
+        start_btn.click()
 
-    groups = await page.querySelectorAll('app-single-word-view')
+        question_containers = driver.find_elements_by_tag_name('app-single-word-view')
+        questions = []
 
-    questions = []
+        for question_container in question_containers:
+            text = question_container.find_element_by_class_name('single-word-template').text
+            alternatives = [a.text for a in question_container.find_elements_by_class_name('alternative')]
+            
+            correct_btn = question_container.find_element_by_class_name('btn-inline-default')
+            correct_btn.click()
 
-    for group in groups:
-        alternatives = []
+            modal = driver.find_element_by_tag_name('app-explanation-modal')
+            correct_label = modal.find_element_by_tag_name('b')
 
-        listItems = await group.querySelectorAll('li')
-        alternatives.append([item.getProperty('textContent')
-                             for item in listItems])
+            correct_letter = correct_label.text.replace('Rätt svar är alternativ:', '').strip()
+            correct = 0
 
-        textLabel = await group.querySelector('div#single-word-template')
-        textResult = await textLabel.getProperty('textContent')
-        text = textResult.jsonValue()
+            if correct_letter == 'A':
+                correct = 0
+            elif correct_letter == 'B':
+                correct = 1
+            elif correct_letter == 'C':
+                correct = 2
+            elif correct_letter == 'D':
+                correct = 3
+            elif correct_letter == 'E':
+                correct = 4
 
-        await group.click('button#btn-sm')
+            close = modal.find_element_by_class_name('btn-outline-default')
+            close.click()
 
-        correctLabel = await group.querySelector('b')
-        correctResult = await correctLabel.getProperty('textContent')
-        correct = await correctResult.jsonValue()
+            question = {
+                'text': text,
+                'alternatives': alternatives,
+                'correct': correct
+            }
 
-        correct = correct.replace('Rätt svar är alternativ:', '')
-        correct = correct.strip()
+            questions.append(question)
 
-        question = {
-            alternatives: alternatives,
-            text: text,
-            correct: correct
-        }
+        return questions
 
-        questions.append(question)
+    except TimeoutException:
+        print("Check your internet connection.")
 
-    await browser.close()
 
-links = getYears()
-asyncio.run(getQuestions(links[0]))
+def main():
+    years = getYears()
+
+    options = webdriver.ChromeOptions()
+    options.add_argument('headless')
+    options.add_argument('no-sandbox')
+
+    driver = webdriver.Chrome(chrome_options=options)
+
+    for year in years:
+        questions = getQuestions(year, driver)
+
+    driver.close()
+
+if __name__ == "__main__":
+    main()
