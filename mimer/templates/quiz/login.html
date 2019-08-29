@@ -1,32 +1,43 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block styles %} {% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'quiz/login.css' %}" />
 
-{% block styles %}
+{% endblock %} {% block content %}
 
-{% load static %}
-<link rel="stylesheet" href="{% static 'quiz/login.css' %}">
+<div class="form-container">
+  <div class="form-signin">
+    <h1>Ordförståelse</h1>
+    <form method="POST" action="login">
+      {% csrf_token %}
 
-{% endblock %}
+      <label for="inputUser" class="sr-only">Username</label>
+      <input
+        type="text"
+        id="inputUser"
+        class="form-control"
+        placeholder="Username"
+        required=""
+        autofocus=""
+        name="username"
+      />
+      <label for="inputPassword" class="sr-only">Password</label>
+      <input
+        type="password"
+        id="inputPassword"
+        class="form-control"
+        placeholder="Password"
+        required=""
+        name="password"
+      />
 
-{% block content %}
+      {% if fail %}
+      <p style="color: red">Incorrect login details.</p>
+      {% endif %}
 
-<div class="container">
-    <form class="form-signin" method="POST" action="login">
-        {% csrf_token %}
-
-        <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-        <label for="inputUser" class="sr-only">Username</label>
-        <input type="text" id="inputUser" class="form-control" placeholder="Username" required="" autofocus=""
-               name="username">
-        <label for="inputPassword" class="sr-only">Password</label>
-        <input type="password" id="inputPassword" class="form-control" placeholder="Password" required="" 
-               name="password">
-
-        {% if fail %}
-            <p style="color: red">Incorrect login details.</p>
-        {% endif %}
-
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+      <button class="btn btn-lg btn-primary btn-block" type="submit">
+        Sign in
+      </button>
     </form>
+  </div>
 </div>
 
 {% endblock %}

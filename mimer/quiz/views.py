@@ -54,8 +54,15 @@ def home(request):
     user = models.QuizUser.objects.get(id=user_id)
 
     context = {
-        'overall_score': user.overall_score
+        'overall_score': user.overall_score,
+        'name': user.username,
     }
+
+    try:
+        tests = models.Test.objects.filter(user=user)
+        context['tests'] = tests
+    except:
+        print('No tests found for user')
 
     return render(request, 'quiz/home.html', context=context)
 

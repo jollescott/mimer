@@ -42,6 +42,8 @@ class Test(models.Model):
     answers = models.ManyToManyField(Answer)
     user = models.ForeignKey(QuizUser, on_delete=models.CASCADE)
     train = models.BooleanField(default=True)
+    date = models.DateTimeField(auto_now=True)
+    complete = models.BooleanField(default=False)
 
     def __str__(self):
         return "{0} {1}".format(self.user, self.id)

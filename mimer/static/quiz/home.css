@@ -1,0 +1,33 @@
+.home-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  height: 100%;
+}
+
+.menu-container {
+    margin: 10px;
+    background-color: lightgray;
+    border-radius: 25px;
+    padding: 20px;
+}
+
+strong{
+    margin: 10px;
+}
+
+.test {
+    margin: 5px;
+    border-radius: 25px;
+    border-color: darkgray;
+    border-width: 5px;
+    padding: 5px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.continue-btn {
+    margin: 10px;
+}
