@@ -50,9 +50,9 @@
                 <p>{{ test.date|date:"D d M Y" }} {{ test.date|time:"H:i" }}</p>
 
                 {% if test.complete %}
-                    <p style="color: green">Done</p>
+                    <p class="continue" style="color: green">Done</p>
                 {% else %}
-                    <a href="/logout" class="btn btn-primary continue-btn" type="submit">Continue</a>
+                    <a href="/resume/{{ test.id }}" class="btn btn-primary continue" type="submit">Continue</a>
                 {% endif %}
             </div>
         {% endfor %}
