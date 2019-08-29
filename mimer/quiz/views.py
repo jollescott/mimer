@@ -54,8 +54,15 @@ def home(request):
     user = models.QuizUser.objects.get(id=user_id)
 
     context = {
-        'overall_score': user.overall_score
+        'overall_score': user.overall_score,
+        'name': user.username,
     }
+
+    try:
+        tests = models.Test.objects.filter(user=user)
+        context['tests'] = tests
+    except:
+        print('No tests found for user')
 
     return render(request, 'quiz/home.html', context=context)
 
@@ -173,7 +180,42 @@ def answer(request, tid, qid, a):
             break
 
     if index >= test.questions.count():
+        test.complete = True
+        test.save()
+
+        answers = models.Answer.objects.filter(user=user)
+        correct = list(filter(lambda x: x.correct == True, answers))
+
+        score = len(correct) / len(answers) 
+        user.overall_score = score
+        user.save()
+
         return redirect('/complete/{0}'.format(test.id))
     else:
         nq = qs[index]
         return redirect('/test/{0}/{1}'.format(test.id, nq.id))
+
+
+def resume(request, tid):
+    user_id = request.user.id
+
+    if user_id is None:
+        return redirect('index')
+
+    test = models.Test.objects.get(id=tid)
+
+    if test is None:
+        return HttpResponse('Test does not exist.')
+
+    questions = test.questions.all()
+    answer_index = len(test.answers.all())
+
+    if answer_index >= len(questions):
+        print('Answer index problem')
+        answer_index = len(questions) - 1
+
+    q = questions[answer_index]
+
+    return redirect('/test/{0}/{1}'.format(test.id, q.id))
+        
+

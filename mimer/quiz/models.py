@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractUser
 # Create your models here.
 
 class QuizUser(AbstractUser):
-    overall_score = models.SmallIntegerField(default=0)
+    overall_score = models.DecimalField(default=0, decimal_places=2, max_digits=100)
     sana = models.BooleanField(default=False)
 
 class IntegerRangeField(models.IntegerField):
@@ -42,6 +42,8 @@ class Test(models.Model):
     answers = models.ManyToManyField(Answer)
     user = models.ForeignKey(QuizUser, on_delete=models.CASCADE)
     train = models.BooleanField(default=True)
+    date = models.DateTimeField(auto_now=True)
+    complete = models.BooleanField(default=False)
 
     def __str__(self):
         return "{0} {1}".format(self.user, self.id)
