@@ -2,7 +2,7 @@
 
 from django.db import migrations
 import os
-import json
+import json, sana
 
 
 def add_questions(apps, schema_editor):
@@ -26,6 +26,12 @@ def add_questions(apps, schema_editor):
             model.answer_e = question['alternatives'][4]
 
             model.save()
+
+            try:
+                asset = sana.learn.LearnAsset(model.id, sana.constants.ASSET_EXERCISE, ['ORD'], model.text)
+                sana.learn.create_or_update_asset(asset)
+            except:
+                print('Could not reach Sana API. Check your internet connection.')
 
     else:
         print('questions.json was not found.')
