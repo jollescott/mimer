@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+
+{% load static %}
+<link rel="stylesheet" href="{% static 'quiz/result.css' %}">
+
+{% endblock %}
+
+{% block content %}
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Test: {{ test.datetime|date:"D d M Y" }} {{ test.datetime|time:"H:i" }}</p></a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+        </ul>
+        <div class="form-inline my-2 my-lg-0">
+            <a href="/home" class="btn btn-outline-danger my-2 my-sm-0" type="submit">Quit</a>
+            </form>
+        </div>
+</nav>
+
+{% if completed %}
+    <h1 style="color: green; margin: 10px;">Great Job! You completed the test.</h1>
+{% endif %}
+
+<div class="answers-container">
+    {% for answer in test.answers %}
+        <div class="test-answer">
+            <strong>{{answer.text}}</strong>
+            
+            {% if answer.correct %}
+                <p style="color: green">Correct</p>
+            {% else %}
+                <p style="color: red">Incorrect</p>
+            {% endif %}
+
+            <ul>
+                {% for alternative in answer.alternatives %}
+                    {% if alternative.correct %}
+                        <li style="color: green">{{alternative.text}}</li>
+                    {% else %}
+                        <li style="color: red">{{alternative.text}}</li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
