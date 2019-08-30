@@ -12,8 +12,9 @@ def scrape():
         original = row[0]
         translated = row[3]
 
-        islandic.append(original.value)
-        english.append(translated.value)
+        if original.value is not None and translated.value is not None:
+            islandic.append(original.value)
+            english.append(translated.value)
 
     return (islandic, english)
         
