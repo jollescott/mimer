@@ -12,5 +12,6 @@ urlpatterns = [
     path('test', views.test, name='test'),
     path('test/<int:tid>/<int:qid>', views.question, name='question'),
     path('answer/<int:tid>/<int:qid>/<int:a>', views.answer, name='answer'),
-    path('resume/<int:tid>', views.resume, name='resume')
+    path('resume/<int:tid>', views.resume, name='resume'),
+    path('result/<int:tid>', views.result, name='result')
 ]

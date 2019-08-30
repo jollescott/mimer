@@ -37,17 +37,20 @@
         <h2>Your score: {{ overall_score }} </h2>
         <div>
             <a href="/test" class="btn btn-primary" style="float: left; margin: 5px">Test</a>
-            <a href="/train" class="btn btn-secondary" style="float: left; margin: 5px">Train</a>
+            <!--<a href="/train" class="btn btn-secondary" style="float: left; margin: 5px">Train</a>-->
         </div>
         
-        <p style="clear: both;">Test runs does not count into your overall score.</p>
+        <!--<p style="clear: both;">Test runs does not count into your overall score.</p>-->
     </div>
 
     <div class="menu-container">
         <h2>Your tests</h2>
         {% for test in tests %}
             <div class="test">
-                <p>{{ test.date|date:"D d M Y" }} {{ test.date|time:"H:i" }}</p>
+                <div class="test-details">
+                    <p>{{ test.date|date:"D d M Y" }} {{ test.date|time:"H:i" }}</p>
+                    <a href="/result/{{ test.id }}"> {{ test.correct_count }} / {{ test.question_count }}</a>
+                </div>
 
                 {% if test.complete %}
                     <p class="continue" style="color: green">Done</p>
