@@ -52,10 +52,12 @@ def home(request):
         return redirect('index')
 
     user = models.QuizUser.objects.get(id=user_id)
+    question_count = models.Question.objects.count()
 
     context = {
         'overall_score': user.overall_score,
         'name': user.username,
+        'question_count': question_count
     }
 
     try:
