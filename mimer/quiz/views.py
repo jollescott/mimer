@@ -61,9 +61,23 @@ def home(request):
     }
 
     try:
-        tests = models.Test.objects.filter(user=user)
+        actual_tests = models.Test.objects.filter(user=user)
+        tests = []
+
+        for a_test in actual_tests:
+            answers = a_test.answers.all()
+            correct_count = len(
+                list(filter(lambda x: x.correct == True, answers)))
+            test_question_count = len(a_test.questions.all())
+
+            test = a_test.__dict__
+            test['correct_count'] = correct_count
+            test['question_count'] = test_question_count
+
+            tests.append(test)
+
         context['tests'] = tests
-    except:
+    except Exception as e:
         print('No tests found for user')
 
     return render(request, 'quiz/home.html', context=context)
@@ -188,11 +202,11 @@ def answer(request, tid, qid, a):
         answers = models.Answer.objects.filter(user=user)
         correct = list(filter(lambda x: x.correct == True, answers))
 
-        score = len(correct) / len(answers) 
+        score = len(correct) / len(answers)
         user.overall_score = score
         user.save()
 
-        return redirect('/complete/{0}'.format(test.id))
+        return redirect('/result/{0}?completed=true'.format(test.id))
     else:
         nq = qs[index]
         return redirect('/test/{0}/{1}'.format(test.id, nq.id))
@@ -219,5 +233,40 @@ def resume(request, tid):
     q = questions[answer_index]
 
     return redirect('/test/{0}/{1}'.format(test.id, q.id))
-        
 
+
+def result(request, tid):
+    completed = request.GET.get('completed', False)
+
+    actual_test = models.Test.objects.get(id=tid)
+    test_answers = actual_test.answers.all()
+
+    answers = []
+
+    for test_answer in test_answers:
+        alternatives = [test_answer.question.answer_a, test_answer.question.answer_b,
+                        test_answer.question.answer_c, test_answer.question.answer_d]
+
+        for i in range(0, len(alternatives)):
+            alternatives[i] = {
+                'text': alternatives[i],
+                'correct': i == test_answer.question.correct
+            }
+
+        answers.append({
+            'text': test_answer.question.text,
+            'correct': test_answer.correct,
+            'alternatives': alternatives
+        })
+
+    test = {
+        'datetime': actual_test.date,
+        'answers': answers
+    }
+
+    context = {
+        'completed': completed,
+        'test': test
+    }
+
+    return render(request, 'quiz/result.html', context=context)

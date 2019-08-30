@@ -28,6 +28,11 @@ strong{
     align-items: center;
 }
 
+.test-details {
+    display: flex;
+    flex-direction: column;
+}
+
 .continue {
     margin-left: 10px;
 }
