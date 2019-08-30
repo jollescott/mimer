@@ -23,7 +23,7 @@ def format_questions(words):
     index = 0
 
     for question in words[0]:
-        alternatives = random.sample(words[1], 3)
+        alternatives = random.sample(words[1], 4)
         correct = words[1][index]
 
         alternatives.append(correct)
