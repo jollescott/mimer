@@ -6,17 +6,28 @@ import os, json
 class Command(BaseCommand):
     help = 'Uploads questions supplied to database.'
 
-    def handle(self, *args, **options):
-        file = args[0]
+    def add_arguments(self, parser):
+        parser.add_argument('questions_json', type=str)
+        parser.add_argument('-d', '--debug', action='store_true')
+        parser.add_argument('-c', '--count', type=int)
 
-        if file is None:
+    def handle(self, *args, **options):
+
+        if 'questions_json' not in options:
             raise CommandError('Error: No file specified.')
 
-        if os.path.isfile('./questions.json'):
-            questions_file = open('./questions.json', 'r')
+        file = options['questions_json']
+        debug = options['debug']
+        count = options['count']
+
+        if os.path.isfile(file):
+            questions_file = open(file, 'r')
             questions_json = questions_file.read()
 
             questions = json.loads(questions_json)
+
+            if count:
+                questions = questions[:count]
 
             for question in questions:
                 try:
@@ -31,8 +42,11 @@ class Command(BaseCommand):
                     model.answer_e = question['alternatives'][4]
 
                     model.save()
+
+                    if debug:
+                        print('Added Question: ' + model.text)
+
                 except Exception as e:
                     raise CommandError('Could not process JSON. Possible format error: ' + e)
-
         else:
             raise CommandError('File was not found')
