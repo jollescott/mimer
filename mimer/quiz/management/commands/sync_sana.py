@@ -28,7 +28,5 @@ class Command(BaseCommand):
 
         try:
             result = create_or_update_assets(assets)
-            print(result)
         except Exception as e:
-            print(e)
             raise CommandError('Could not upload Sana Assets. Possible network error or wrong API key? ')
