@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 
 # Create your views here.
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 import django.contrib.auth
 from . import models
 
@@ -164,18 +165,18 @@ def question(request, tid, qid):
 
     return render(request, 'quiz/question.html', context=context)
 
-
+@csrf_exempt
 def answer(request, tid, qid, a):
     user_id = request.user.id
 
     if user_id is None:
-        return redirect('index')
+        return HttpResponse(status=401)
 
     user = models.QuizUser.objects.get(id=user_id)
     test = models.Test.objects.get(id=tid)
 
     if test is None:
-        return HttpResponse('Test does not exist.')
+        return HttpResponse(status=404)
 
     q = test.questions.all().get(id=qid)
 
@@ -195,6 +196,8 @@ def answer(request, tid, qid, a):
         if qc.id == q.id:
             break
 
+    link = ""
+
     if index >= test.questions.count():
         test.complete = True
         test.save()
@@ -206,10 +209,15 @@ def answer(request, tid, qid, a):
         user.overall_score = score
         user.save()
 
-        return redirect('/result/{0}?completed=true'.format(test.id))
+        link = '/result/{0}?completed=true'.format(test.id)
     else:
         nq = qs[index]
-        return redirect('/test/{0}/{1}'.format(test.id, nq.id))
+        link = '/test/{0}/{1}'.format(test.id, nq.id)
+
+    return JsonResponse({
+        'link': link,
+        'correct': q.correct
+    })
 
 
 def resume(request, tid):
