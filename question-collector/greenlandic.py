@@ -44,7 +44,7 @@ def format_questions(words):
         }
 
         if words[2][index] is not None:
-            question['tag'] = words[2][index]
+            question['meta'] = [words[2][index]]
 
         questions.append(question)
 
