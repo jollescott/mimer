@@ -7,16 +7,21 @@ def scrape():
 
     islandic = []
     english = []
+    tags = []
 
     for row in ws.iter_rows():
         original = row[0]
         translated = row[3]
+        tag = row[1]
 
         if original.value is not None and translated.value is not None:
-            islandic.append(original.value)
-            english.append(translated.value)
 
-    return (islandic, english)
+            if len(translated.value.split()) == 1:
+                islandic.append(original.value)
+                english.append(translated.value)
+                tags.append(tag.value)
+
+    return (islandic, english, tags)
         
 
 def format_questions(words):
@@ -37,6 +42,9 @@ def format_questions(words):
             'alternatives': alternatives,
             'correct': correct_index
         }
+
+        if words[2][index] is not None:
+            question['meta'] = [words[2][index]]
 
         questions.append(question)
 
