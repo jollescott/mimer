@@ -11,7 +11,8 @@
             "program": "${workspaceFolder}/manage.py",
             "args": [
                 "runserver",
-                "--noreload"
+                "--noreload",
+                "--settings=mimer.settings.local"
             ],
             "django": true
         }
