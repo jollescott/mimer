@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from quiz.models import Question
-from sana.learn import create_or_update_assets, LearnAsset
+from sana.learn import (create_or_update_assets, LearnAsset,
+    ViewItem, LearnView, create_or_update_view)
 from sana.constants import ASSET_EXERCISE
 import os
 import json
@@ -28,7 +29,11 @@ class Command(BaseCommand):
 
         try:
             result = create_or_update_assets(assets)
-            print(result)
         except Exception as e:
-            print(e)
             raise CommandError('Could not upload Sana Assets. Possible network error or wrong API key? ')
+
+        view_items = [ViewItem(asset.id, 'greenlandic/{0}]'.format(asset.id)) for asset in assets]
+        view = LearnView('greenlandic', view_items, path='greenlandic')
+
+        create_or_update_view(0, view)
+        

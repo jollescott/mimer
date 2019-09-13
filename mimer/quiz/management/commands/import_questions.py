@@ -47,6 +47,6 @@ class Command(BaseCommand):
                         print('Added Question: ' + model.text)
 
                 except Exception as e:
-                    raise CommandError('Could not process JSON. Possible format error: ' + e)
+                    raise CommandError('Could not process JSON. Possible format error: ' + str(e))
         else:
             raise CommandError('File was not found')

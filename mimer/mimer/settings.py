@@ -25,7 +25,7 @@ SECRET_KEY = 'tr79f6j=9sxahe%nbll50b-c*!^jvosz2vumimih=tyoy8v0%_'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['mimer-test.herokuapp.com']
 
 
 # Application definition

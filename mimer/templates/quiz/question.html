@@ -27,10 +27,42 @@
 
 <div class="question-container">
     <h2>{{ text }} </h2>
-    <a href="/answer/{{ test_id }}/{{ question_id }}/0" class="btn btn-primary" style="margin: 5px">{{ answer_a }}</a>
-    <a href="/answer/{{ test_id }}/{{ question_id }}/1" class="btn btn-primary" style="margin: 5px">{{ answer_b }}</a>
-    <a href="/answer/{{ test_id }}/{{ question_id }}/2" class="btn btn-primary" style="margin: 5px">{{ answer_c }}</a>
-    <a href="/answer/{{ test_id }}/{{ question_id }}/3" class="btn btn-primary" style="margin: 5px">{{ answer_d }}</a>
+    <button onclick="answerQuestion(0)" class="btn btn-primary answer" style="margin: 5px">{{ answer_a }}</a>
+    <button onclick="answerQuestion(1)" class="btn btn-primary answer" style="margin: 5px">{{ answer_b }}</a>
+    <button onclick="answerQuestion(2)" class="btn btn-primary answer" style="margin: 5px">{{ answer_c }}</a>
+    <button onclick="answerQuestion(3)" class="btn btn-primary answer" style="margin: 5px">{{ answer_d }}</a>
+    <button onclick="answerQuestion(4)" class="btn btn-primary answer" style="margin: 5px">{{ answer_e }}</a>
 </div>
+
+<script>
+
+    var startTime = 0;
+
+    $(document).ready(() => {
+        startTime = Date.now();
+    });
+
+    function answerQuestion(alternative){
+        const time = Date.now() - startTime;
+        const url = window.location.origin + '/answer/{{ test_id }}/{{ question_id }}/' + alternative + '?time=' + time;
+
+        $.post(url, (data, status, jqHXR) => {
+            const correct = data.correct;
+
+            $('.answer').each((index, element) => {
+                element.classList.remove('btn-primary');
+
+                console.log('Correct: ' + correct);
+
+                if(index == correct)
+                    element.classList.add('btn-success');
+                else
+                    element.classList.add('btn-danger');
+            }).promise().done(() => {
+                setTimeout(() => {window.location = data.link}, 2000);
+            });
+        });
+    }
+</script>
 
 {% endblock %}
