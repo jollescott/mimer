@@ -84,14 +84,14 @@ def home(request):
     return render(request, 'quiz/home.html', context=context)
 
 
-def create_test(user_id, is_train):
+def create_test(user_id):
     user = models.QuizUser.objects.get(id=user_id)
     count = models.Question.objects.aggregate(count=Count('id'))['count']
 
     if count == 0:
         return None
 
-    use_sana = is_train is False and user.sana is True
+    use_sana = user.sana is True
 
     questions = []
 
@@ -103,7 +103,7 @@ def create_test(user_id, is_train):
             question = models.Question.objects.all()[random_index]
             questions.append(question)
 
-    test = models.Test(user=user, train=is_train)
+    test = models.Test(user=user)
     test.save()
     test.questions.set(questions)
     test.save()
@@ -117,24 +117,10 @@ def train(request):
     if user_id is None:
         return redirect('index')
 
-    test = create_test(user_id, True)
+    test = create_test(user_id)
 
     if test is None:
         return HttpResponse('Could not create test')
-
-    return redirect('/test/{0}/{1}'.format(test.id, test.questions.all()[0].id))
-
-
-def test(request):
-    user_id = request.user.id
-
-    if user_id is None:
-        return redirect('index')
-
-    test = create_test(user_id, False)
-
-    if test is None:
-        return redirect('home')
 
     return redirect('/test/{0}/{1}'.format(test.id, test.questions.all()[0].id))
 
@@ -158,7 +144,7 @@ def question(request, tid, qid):
         'answer_b': q.answer_b,
         'answer_c': q.answer_c,
         'answer_d': q.answer_d,
-        'train': test.train,
+        'answer_e': q.answer_e,
         'question_id': q.id,
         'test_id': test.id
     }
@@ -168,6 +154,7 @@ def question(request, tid, qid):
 @csrf_exempt
 def answer(request, tid, qid, a):
     user_id = request.user.id
+    time_str = request.GET.get('time', 0)
 
     if user_id is None:
         return HttpResponse(status=401)
@@ -180,9 +167,15 @@ def answer(request, tid, qid, a):
 
     q = test.questions.all().get(id=qid)
 
-    correct = q.correct == a
+    existing = test.answers.all().filter(question=q)
 
-    a = models.Answer(correct=correct, question=q, user=user)
+    if len(existing) > 0:
+        return HttpResponse(status=403)
+
+    correct = q.correct == a
+    time = float(time_str)
+
+    a = models.Answer(correct=correct, question=q, user=user, time=time)
     a.save()
 
     test.answers.add(a)

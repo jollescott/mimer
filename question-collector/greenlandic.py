@@ -16,7 +16,7 @@ def scrape():
 
         if original.value is not None and translated.value is not None:
 
-            if ',' not in original.value and len(original.value.split()) == 1:
+            if len(translated.value.split()) == 1:
                 islandic.append(original.value)
                 english.append(translated.value)
                 tags.append(tag.value)

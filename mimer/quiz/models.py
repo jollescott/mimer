@@ -19,10 +19,11 @@ class IntegerRangeField(models.IntegerField):
 class Question(models.Model):
     text = models.CharField(max_length=50)
 
-    answer_a = models.CharField(max_length=50)
-    answer_b = models.CharField(max_length=50)
-    answer_c = models.CharField(max_length=50)
-    answer_d = models.CharField(max_length=50)
+    answer_a = models.CharField(max_length=50, default='Alternative 1')
+    answer_b = models.CharField(max_length=50, default='Alternative 2')
+    answer_c = models.CharField(max_length=50, default='Alternative 3')
+    answer_d = models.CharField(max_length=50, default='Alternative 4')
+    answer_e = models.CharField(max_length=50, default='Alternative 5')
 
     correct = IntegerRangeField(min_value=0, max_value=3, default=0)
 
@@ -42,7 +43,6 @@ class Test(models.Model):
     questions = models.ManyToManyField(Question)
     answers = models.ManyToManyField(Answer)
     user = models.ForeignKey(QuizUser, on_delete=models.CASCADE)
-    train = models.BooleanField(default=True)
     date = models.DateTimeField(auto_now=True)
     complete = models.BooleanField(default=False)
 
