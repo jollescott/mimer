@@ -18,6 +18,7 @@ RUN pip install -r requirements.txt
 
 # copy project
 COPY . .
+RUN pip install ./sana-python
 
 # add and run as non-root user
 RUN adduser -D mimer
