@@ -10,7 +10,7 @@ ENV PYTHONUNBUFFERED 1
 ENV DEBUG 0
 
 RUN apk update \
-    && apk add build-base gcc python3-dev  
+    && apk add build-base gcc python3-dev postgresql-devel
 
 # install dependencies
 COPY ./requirements.txt .
