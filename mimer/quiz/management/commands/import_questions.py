@@ -10,6 +10,7 @@ class Command(BaseCommand):
         parser.add_argument('questions_json', type=str)
         parser.add_argument('-d', '--debug', action='store_true')
         parser.add_argument('-c', '--count', type=int)
+        parser.add_argument('-i', '--init', action='store_true')
 
     def handle(self, *args, **options):
 
@@ -18,7 +19,13 @@ class Command(BaseCommand):
 
         file = options['questions_json']
         debug = options['debug']
+        init = options['init']
         count = options['count']
+
+        if init:
+            if len(Question.objects.all()) > 0:
+                print('Database has already been seeded!')
+                return
 
         if os.path.isfile(file):
             questions_file = open(file, 'r')
