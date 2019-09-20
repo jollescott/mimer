@@ -10,7 +10,9 @@ ENV PYTHONUNBUFFERED 1
 ENV DEBUG 0
 
 RUN apk update \
-    && apk add build-base gcc python3-dev postgresql-devel
+    && apk add build-base gcc python3-dev 
+
+RUN apk add postgresql-dev --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main
 
 # install dependencies
 COPY ./requirements.txt .
@@ -25,6 +27,7 @@ RUN adduser -D mimer
 USER mimer
 
 ENV DJANGO_SETTINGS_MODULE mimer.settings.production
+RUN python manage.py migrate
 RUN echo "from quiz.models import QuizUser; QuizUser.objects.create_superuser('joel', 'JoLi0125@student.grillska.se', '@GrillskaCool123')" | python manage.py shell; exit 0
 
 # run gunicorn
