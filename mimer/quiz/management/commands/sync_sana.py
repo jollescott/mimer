@@ -3,8 +3,6 @@ from quiz.models import Question
 from sana.learn import (create_or_update_assets, LearnAsset,
     ViewItem, LearnView, create_or_update_view)
 from sana.constants import ASSET_EXERCISE
-import os
-import json
 
 
 class Command(BaseCommand):
