@@ -22,15 +22,15 @@ RUN pip install -r requirements.txt
 COPY . .
 RUN pip install ./sana-python
 
-# add and run as non-root user
-RUN adduser -D mimer
-USER mimer
-
 ENV DJANGO_SETTINGS_MODULE mimer.settings.production
 RUN python manage.py migrate
 RUN python manage.py collectstatic
-RUN python manage.py import_questions ./questions.json  --init
+RUN python manage.py import_questions ./questions.json  --init --count 50
 RUN echo "from quiz.models import QuizUser; QuizUser.objects.create_superuser('joel', 'JoLi0125@student.grillska.se', '@GrillskaCool123')" | python manage.py shell; exit 0
+
+# add and run as non-root user
+RUN adduser -D mimer
+USER mimer
 
 # run gunicorn
 CMD gunicorn mimer.wsgi:application --bind 0.0.0.0:$PORT
