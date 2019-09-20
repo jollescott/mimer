@@ -24,5 +24,8 @@ RUN pip install ./sana-python
 RUN adduser -D mimer
 USER mimer
 
+RUN echo "from quiz.models import QuizUser; QuizUser.objects.create_superuser('joel', 'JoLi0125@student.grillska.se', '@GrillskaCool123')" | python manage.py shell; exit 0
+ENV DJANGO_SETTINGS_MODULE mimer.settings.production
+
 # run gunicorn
 CMD gunicorn mimer.wsgi:application --bind 0.0.0.0:$PORT
