@@ -246,7 +246,8 @@ def result(request, tid):
 
     for test_answer in test_answers:
         alternatives = [test_answer.question.answer_a, test_answer.question.answer_b,
-                        test_answer.question.answer_c, test_answer.question.answer_d]
+                        test_answer.question.answer_c, test_answer.question.answer_d,
+                        test_answer.question.answer_e]
 
         for i in range(0, len(alternatives)):
             alternatives[i] = {
