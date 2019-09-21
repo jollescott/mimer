@@ -27,11 +27,11 @@ class Command(BaseCommand):
 
         try:
             result = create_or_update_assets(assets)
+            print(result)
         except Exception as e:
             raise CommandError('Could not upload Sana Assets. Possible network error or wrong API key? ')
 
-        view_items = [ViewItem(asset.id, 'greenlandic/{0}]'.format(asset.id)) for asset in assets]
-        view = LearnView('greenlandic', view_items, path='greenlandic')
-
-        create_or_update_view(0, view)
+        view_items = [ViewItem(asset.id, '/greenlandic/{0}'.format(asset.id)) for asset in assets]
+        view = LearnView('greenlandic', view_items, path='/greenlandic')
+        create_or_update_view(1, view)
         
