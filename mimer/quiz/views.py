@@ -81,7 +81,7 @@ def home(request):
 
             tests.append(test)
 
-        context['tests'] = tests
+        context['tests'] = reversed(tests)
     except Exception as e:
         print('No tests found for user')
 
