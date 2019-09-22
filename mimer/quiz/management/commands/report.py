@@ -27,7 +27,10 @@ class Command(BaseCommand):
         correct = list(filter(lambda x: x.correct == True, answers))
 
         self.sheet['D1'] = 'Correct ratio'
-        self.sheet['D2'] = len(correct) / len(answers)
+        self.sheet['D2'] = len(correct) / len(answers) if len(answers) > 0 else 0
+
+        self.sheet['E1'] = 'Sana?'
+        self.sheet['E2'] = str(self.user.sana)
 
     def plot_tests(self):
         tests = Test.objects.filter(user=self.user)
