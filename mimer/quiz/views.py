@@ -99,7 +99,7 @@ def create_test(user):
     questions = []
 
     if use_sana:
-        sana_user = SanaUser(user_id, USER_LEARNER)
+        sana_user = SanaUser(user.id, USER_LEARNER)
 
         asset_filter = AssetFilter([ASSET_EXERCISE], ['/greenlandic'])
         mode = Mode('learn', {
