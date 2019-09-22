@@ -8,10 +8,10 @@ from . import models
 
 from django.db.models.aggregates import Count
 from random import randint
-from sana.learn import (post_user_events, next_assets, UserEvent, UserEventAttribute,
-                        UserEventTag, Mode, AssetFilter)
+from sana.learn import (post_user_events, next_assets, UserEvent, UserEventAttributes,
+                        UserEventTag, Mode, AssetFilter, SanaUser)
 
-from sana.constants import EVENT_RESPONSE_SUBMIT, ASSET_EXERCISE
+from sana.constants import EVENT_RESPONSE_SUBMIT, ASSET_EXERCISE, USER_LEARNER
 from datetime import datetime
 
 def index(request):
@@ -99,10 +99,7 @@ def create_test(user):
     questions = []
 
     if use_sana:
-        sana_user = {
-            'id': str(user.id),
-            'type': 'learner'
-        }
+        sana_user = SanaUser(user_id, USER_LEARNER)
 
         asset_filter = AssetFilter([ASSET_EXERCISE], ['/greenlandic'])
         mode = Mode('learn', {
@@ -227,17 +224,13 @@ def answer(request, tid, qid, a):
         link = '/test/{0}/{1}'.format(test.id, nq.id)
 
     if request.user.sana:
-        user = {
-            'id': str(request.user.id),
-            'type': 'learner'
-        }
+        user = SanaUser(user_id, USER_LEARNER)
 
         result = 'correct' if correct else 'incorrect'
-        events = [UserEventAttribute(1, qid, result, score=1, time_spent_ms=time)]
+        events = UserEventAttributes(1, qid, result, score=1, time_spent_ms=time)
 
-        event = UserEvent(user, EVENT_RESPONSE_SUBMIT, events, datetime.now().isoformat())
+        event = UserEvent(user, EVENT_RESPONSE_SUBMIT, events, datetime.utcnow())
         result = post_user_events([event])
-        print(result)
 
     return JsonResponse({
         'link': link,
