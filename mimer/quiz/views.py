@@ -66,7 +66,7 @@ def home(request):
     }
 
     try:
-        actual_tests = models.Test.objects.filter(user=user)
+        actual_tests = models.Test.objects.filter(user=user).order_by('date')
         tests = []
 
         for a_test in actual_tests:
