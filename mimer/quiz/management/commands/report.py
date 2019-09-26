@@ -18,34 +18,32 @@ class Command(BaseCommand):
         self.sheet['B1'] = 'Final Score'
         self.sheet['B2'] = self.user.overall_score
 
-        tests = Test.objects.filter(user=self.user)
-
         self.sheet['C1'] = 'Completed quizzes'
-        self.sheet['C2'] = len(tests)
+        self.sheet['C2'] = len(self.tests)
 
-        answers = Answer.objects.filter(user=self.user)
-        correct = list(filter(lambda x: x.correct == True, answers))
+        correct = list(filter(lambda x: x.correct == True, self.answers))
 
         self.sheet['D1'] = 'Correct ratio'
-        self.sheet['D2'] = len(correct) / len(answers) if len(answers) > 0 else 0
+        self.sheet['D2'] = len(
+            correct) / len(self.answers) if len(self.answers) > 0 else 0
 
         self.sheet['E1'] = 'Sana?'
         self.sheet['E2'] = str(self.user.sana)
 
     def plot_tests(self):
-        tests = Test.objects.filter(user=self.user)
 
         self.sheet['A10'] = 'Date'
         self.sheet['B10'] = 'Correct percentage'
 
-        test_count = len(tests)
+        test_count = len(self.tests)
 
         for i in range(0, test_count):
-            test = tests[i]
+            test = self.tests[i]
             answers = test.answers.all()
             correct = list(filter(lambda x: x.correct == True, answers))
 
-            self.sheet['A{0}'.format(i + 11)] = test.date.strftime("%d %m %Y %H:%M")
+            self.sheet['A{0}'.format(
+                i + 11)] = test.date.strftime("%d %m %Y %H:%M")
             self.sheet['B{0}'.format(i + 11)] = len(correct) / \
                 len(answers) if len(answers) > 0 else 0
 
@@ -60,17 +58,50 @@ class Command(BaseCommand):
         chart.set_categories(x_values)
         chart.title = 'Test score over time'
 
-        chart.x_axis.number_format ='dd mm yyyy HH:MM'
+        chart.x_axis.number_format = 'dd mm yyyy HH:MM'
         chart.x_axis.title = 'Date'
         chart.y_axis.title = 'Correct percentage'
         self.sheet.add_chart(chart, 'A{0}'.format(test_count + 12))
 
+    def plot_timing(self):
+        self.sheet['A35'] = 'Date'
+        self.sheet['B35'] = 'Average Reaction Time'
+
+        test_count = len(self.tests)
+
+        for i in range(0, test_count):
+            test = self.tests[i]
+            answers = test.answers.all()
+            reaction_times = [answer.time for answer in answers]
+
+            reaction_average = sum(reaction_times) / len(reaction_times)
+
+            self.sheet['A{0}'.format(
+                i + 36)] = test.date.strftime("%d %m %Y %H:%M")
+            self.sheet['B{0}'.format(i + 36)] = reaction_average
+
+        x_values = openpyxl.chart.Reference(
+            self.sheet, min_col=1, min_row=36, max_row=36+test_count)
+
+        y_values = openpyxl.chart.Reference(
+            self.sheet, min_col=2, min_row=36, max_row=36+test_count)
+
+        chart = openpyxl.chart.LineChart()
+        chart.add_data(y_values)
+        chart.set_categories(x_values)
+        chart.title = 'Test score over time'
+
+        chart.x_axis.number_format = 'dd mm yyyy HH:MM'
+        chart.x_axis.title = 'Date'
+        chart.y_axis.title = 'Correct percentage'
+        self.sheet.add_chart(chart, 'A{0}'.format(test_count + 36))
+
     def scale_columns(self):
         for col in self.sheet.columns:
             max_length = 0
-            column = col[0].column_letter  # Get the column name
+            column = col[0].column_letter
             for cell in col:
-                try:  # Necessary to avoid error on empty cells
+                try:
                     if len(str(cell.value)) > max_length:
                         max_length = len(cell.value)
                 except:
@@ -122,8 +153,12 @@ class Command(BaseCommand):
             self.sheet = sheet
             self.user = user
 
+            self.tests = Test.objects.filter(user=self.user).order_by('date')
+            self.answers = Answer.objects.filter(user=self.user).order_by('date')
+
             self.add_intro()
             self.plot_tests()
+            self.plot_timing()
 
             self.scale_columns()
             wb.save('reports/{0}/{1}.xlsx'.format(timestamp, user.username))
