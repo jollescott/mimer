@@ -1,9 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from quiz.models import QuizUser, Test, Answer
-import os
-import dateparser
-import openpyxl
-import datetime
+import os, dateparser, dateparser, datetime, openpyxl
 
 
 class Command(BaseCommand):
@@ -125,8 +122,11 @@ class Command(BaseCommand):
         all = options['all']
         debug = options['debug']
 
-        self.start = dateparser.parse(start_str)
-        self.end = dateparser.parse(end_str)
+        naive_start = dateparser.parse(start_str)
+        naive_end = dateparser.parse(end_str)
+
+        self.start = naive_start.replace(tzinfo=datetime.timezone.utc)
+        self.end = naive_end.replace(tzinfo=datetime.timezone.utc)
 
         users = []
 
@@ -153,8 +153,8 @@ class Command(BaseCommand):
             self.sheet = sheet
             self.user = user
 
-            self.tests = Test.objects.filter(user=self.user).order_by('date')
-            self.answers = Answer.objects.filter(user=self.user).order_by('date')
+            self.tests = Test.objects.filter(user=self.user).filter(date__range=[self.start, self.end]).order_by('date')
+            self.answers = Answer.objects.filter(user=self.user).filter(date__range=[self.start, self.end]).order_by('date')
 
             self.add_intro()
             self.plot_tests()
