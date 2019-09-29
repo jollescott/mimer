@@ -1,6 +1,10 @@
 from django.core.management.base import BaseCommand, CommandError
 from quiz.models import QuizUser, Test, Answer
-import os, dateparser, dateparser, datetime, openpyxl
+import os
+import dateparser
+import dateparser
+import datetime
+import openpyxl
 
 
 class Command(BaseCommand):
@@ -27,12 +31,15 @@ class Command(BaseCommand):
         self.sheet['E1'] = 'Sana?'
         self.sheet['E2'] = str(self.user.sana)
 
+        self.cursor = 4
+
     def plot_tests(self):
 
-        self.sheet['A10'] = 'Date'
-        self.sheet['B10'] = 'Correct percentage'
+        self.sheet['A{0}'.format(self.cursor)] = 'Date'
+        self.sheet['B{0}'.format(self.cursor)] = 'Correct percentage'
 
         test_count = len(self.tests)
+        empty_y = self.cursor + 1
 
         for i in range(0, test_count):
             test = self.tests[i]
@@ -40,15 +47,17 @@ class Command(BaseCommand):
             correct = list(filter(lambda x: x.correct == True, answers))
 
             self.sheet['A{0}'.format(
-                i + 11)] = test.date.strftime("%d %m %Y %H:%M")
-            self.sheet['B{0}'.format(i + 11)] = len(correct) / \
+                i + empty_y)] = test.date.strftime("%d %m %Y %H:%M")
+            self.sheet['B{0}'.format(i + empty_y)] = len(correct) / \
                 len(answers) if len(answers) > 0 else 0
 
+            self.cursor = self.cursor + 1
+
         x_values = openpyxl.chart.Reference(
-            self.sheet, min_col=1, min_row=11, max_row=10+test_count)
+            self.sheet, min_col=1, min_row=empty_y, max_row=empty_y+test_count)
 
         y_values = openpyxl.chart.Reference(
-            self.sheet, min_col=2, min_row=11, max_row=10+test_count)
+            self.sheet, min_col=2, min_row=empty_y, max_row=empty_y+test_count)
 
         chart = openpyxl.chart.LineChart()
         chart.add_data(y_values)
@@ -58,40 +67,48 @@ class Command(BaseCommand):
         chart.x_axis.number_format = 'dd mm yyyy HH:MM'
         chart.x_axis.title = 'Date'
         chart.y_axis.title = 'Correct percentage'
-        self.sheet.add_chart(chart, 'A{0}'.format(test_count + 12))
+        self.sheet.add_chart(chart, 'D{0}'.format(empty_y))
+
+        self.cursor = self.cursor + 2
 
     def plot_timing(self):
-        self.sheet['A35'] = 'Date'
-        self.sheet['B35'] = 'Average Reaction Time'
+        self.sheet['A{0}'.format(self.cursor)] = 'Date'
+        self.sheet['B{0}'.format(self.cursor)] = 'Average Reaction Time'
 
         test_count = len(self.tests)
+        empty_y = self.cursor + 1
 
         for i in range(0, test_count):
             test = self.tests[i]
             answers = test.answers.all()
             reaction_times = [answer.time for answer in answers]
 
-            reaction_average = sum(reaction_times) / len(reaction_times)
+            reaction_average = sum(
+                reaction_times) / len(reaction_times) if len(reaction_times) > 0 else 0
 
             self.sheet['A{0}'.format(
-                i + 36)] = test.date.strftime("%d %m %Y %H:%M")
-            self.sheet['B{0}'.format(i + 36)] = reaction_average
+                i + empty_y)] = test.date.strftime("%d %m %Y %H:%M")
+            self.sheet['B{0}'.format(i + empty_y)] = reaction_average
+
+            self.cursor = self.cursor + 1
 
         x_values = openpyxl.chart.Reference(
-            self.sheet, min_col=1, min_row=36, max_row=36+test_count)
+            self.sheet, min_col=1, min_row=empty_y, max_row=empty_y+test_count)
 
         y_values = openpyxl.chart.Reference(
-            self.sheet, min_col=2, min_row=36, max_row=36+test_count)
+            self.sheet, min_col=2, min_row=empty_y, max_row=empty_y+test_count)
 
         chart = openpyxl.chart.LineChart()
         chart.add_data(y_values)
         chart.set_categories(x_values)
-        chart.title = 'Test score over time'
+        chart.title = 'Average reaction rime over time'
 
         chart.x_axis.number_format = 'dd mm yyyy HH:MM'
         chart.x_axis.title = 'Date'
         chart.y_axis.title = 'Correct percentage'
-        self.sheet.add_chart(chart, 'A{0}'.format(test_count + 36))
+        self.sheet.add_chart(chart, 'D{0}'.format(empty_y))
+
+        empty_y = self.cursor + 2
 
     def scale_columns(self):
         for col in self.sheet.columns:
@@ -152,9 +169,12 @@ class Command(BaseCommand):
 
             self.sheet = sheet
             self.user = user
+            self.cursor = 1
 
-            self.tests = Test.objects.filter(user=self.user).filter(date__range=[self.start, self.end]).order_by('date')
-            self.answers = Answer.objects.filter(user=self.user).filter(date__range=[self.start, self.end]).order_by('date')
+            self.tests = Test.objects.filter(user=self.user).filter(
+                date__range=[self.start, self.end]).order_by('date')
+            self.answers = Answer.objects.filter(user=self.user).filter(
+                date__range=[self.start, self.end]).order_by('date')
 
             self.add_intro()
             self.plot_tests()
