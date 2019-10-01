@@ -7,28 +7,21 @@ class QuizUser(AbstractUser):
     overall_score = models.DecimalField(default=0, decimal_places=2, max_digits=100)
     sana = models.BooleanField(default=False)
 
-class IntegerRangeField(models.IntegerField):
-    def __init__(self, verbose_name=None, name=None, min_value=None, max_value=None, **kwargs):
-        self.min_value, self.max_value = min_value, max_value
-        models.IntegerField.__init__(self, verbose_name, name, **kwargs)
-    def formfield(self, **kwargs):
-        defaults = {'min_value': self.min_value, 'max_value':self.max_value}
-        defaults.update(kwargs)
-        return super(IntegerRangeField, self).formfield(**defaults)
+class Asset(models.Model):
+    text = models.CharField(max_length=50) 
+    tags = models.CharField(max_length=200)
 
 class Question(models.Model):
     text = models.CharField(max_length=50)
 
-    answer_a = models.CharField(max_length=50, default='Alternative 1')
-    answer_b = models.CharField(max_length=50, default='Alternative 2')
-    answer_c = models.CharField(max_length=50, default='Alternative 3')
-    answer_d = models.CharField(max_length=50, default='Alternative 4')
-    answer_e = models.CharField(max_length=50, default='Alternative 5')
-
-    correct = IntegerRangeField(min_value=0, max_value=3, default=0)
-
     def __str__(self):
         return self.text
+
+class Alternative(models.Model):
+    asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
+    correct = models.BooleanField(default=False)
+
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
 class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
