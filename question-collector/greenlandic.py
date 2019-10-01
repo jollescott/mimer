@@ -1,18 +1,21 @@
-import os, json, random
+import os
+import json
+import random
 from openpyxl import load_workbook
 
+
 def scrape():
-    wb = load_workbook('./greenlandic.xlsx', read_only=True)
+    wb = load_workbook('./greenlandic-swedish.xlsx', read_only=True)
     ws = wb.active
 
     islandic = []
     english = []
     tags = []
 
-    for row in ws.iter_rows():
+    for row in ws.iter_rows(min_row=2):
         original = row[0]
-        translated = row[3]
-        tag = row[1]
+        translated = row[1]
+        tag = row[2]
 
         if original.value is not None and translated.value is not None:
 
@@ -22,29 +25,21 @@ def scrape():
                 tags.append(tag.value)
 
     return (islandic, english, tags)
-        
+
 
 def format_questions(words):
     questions = []
     index = 0
 
     for question in words[0]:
-        alternatives = random.sample(words[1], 4)
-        correct = words[1][index]
-
-        alternatives.append(correct)
-        random.shuffle(alternatives)
-
-        correct_index = alternatives.index(correct)
+        translation = words[1][index]
+        tags = words[2][index]
 
         question = {
-            'text': question,
-            'alternatives': alternatives,
-            'correct': correct_index
+            'greenlandic': question,
+            'swedish': translation,
+            'tags': tags
         }
-
-        if words[2][index] is not None:
-            question['meta'] = [words[2][index]]
 
         questions.append(question)
 
@@ -52,13 +47,14 @@ def format_questions(words):
 
     return questions
 
+
 if __name__ == "__main__":
     if os.path.isfile('./greenlandic.xlsx'):
         questions = scrape()
         questions = format_questions(questions)
-        
+
         file = open('questions.json', 'w')
         file.write(json.dumps(questions))
+        file.close()
     else:
         print('Dictionary not found.')
-    
