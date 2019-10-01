@@ -35,6 +35,7 @@ class Answer(models.Model):
     user = models.ForeignKey(QuizUser, on_delete=models.CASCADE)
     correct = models.BooleanField(default=False)
     time = models.DecimalField(default=0, decimal_places=2, max_digits=100)
+    date = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return "{0} {1} version: {2}".format(self.user, self.question, self.id)

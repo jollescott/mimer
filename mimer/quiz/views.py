@@ -8,7 +8,11 @@ from . import models
 
 from django.db.models.aggregates import Count
 from random import randint
+from sana.learn import (post_user_events, next_assets, UserEvent, UserEventAttributes,
+                        UserEventTag, Mode, AssetFilter, SanaUser)
 
+from sana.constants import EVENT_RESPONSE_SUBMIT, ASSET_EXERCISE, USER_LEARNER
+from datetime import datetime
 
 def index(request):
     if request.user.is_authenticated:
@@ -62,7 +66,7 @@ def home(request):
     }
 
     try:
-        actual_tests = models.Test.objects.filter(user=user)
+        actual_tests = models.Test.objects.filter(user=user).order_by('date')
         tests = []
 
         for a_test in actual_tests:
@@ -77,15 +81,14 @@ def home(request):
 
             tests.append(test)
 
-        context['tests'] = tests
+        context['tests'] = reversed(tests)
     except Exception as e:
         print('No tests found for user')
 
     return render(request, 'quiz/home.html', context=context)
 
 
-def create_test(user_id):
-    user = models.QuizUser.objects.get(id=user_id)
+def create_test(user):
     count = models.Question.objects.aggregate(count=Count('id'))['count']
 
     if count == 0:
@@ -96,7 +99,20 @@ def create_test(user_id):
     questions = []
 
     if use_sana:
-        pass
+        sana_user = SanaUser(user.id, USER_LEARNER)
+
+        asset_filter = AssetFilter([ASSET_EXERCISE], ['/greenlandic'])
+        mode = Mode('learn', {
+            'language': 'greenlandic'
+        })
+
+        data = next_assets(sana_user, 1, asset_filter, mode, 10)
+
+        for asset in data['data']: 
+            id = asset['asset_id']
+            question = models.Question.objects.get(id=id)
+            questions.append(question)
+
     else:
         for i in range(0, 10):
             random_index = randint(0, count - 1)
@@ -112,12 +128,12 @@ def create_test(user_id):
 
 
 def train(request):
-    user_id = request.user.id
+    user = request.user
 
-    if user_id is None:
+    if user is None:
         return redirect('index')
 
-    test = create_test(user_id)
+    test = create_test(user)
 
     if test is None:
         return HttpResponse('Could not create test')
@@ -206,6 +222,15 @@ def answer(request, tid, qid, a):
     else:
         nq = qs[index]
         link = '/test/{0}/{1}'.format(test.id, nq.id)
+
+    if request.user.sana:
+        user = SanaUser(user_id, USER_LEARNER)
+
+        result = 'correct' if correct else 'incorrect'
+        events = UserEventAttributes(1, qid, result, score=1, time_spent_ms=time)
+
+        event = UserEvent(user, EVENT_RESPONSE_SUBMIT, events, datetime.utcnow())
+        result = post_user_events([event])
 
     return JsonResponse({
         'link': link,
