@@ -9,7 +9,11 @@ class QuizUser(AbstractUser):
 
 class Asset(models.Model):
     text = models.CharField(max_length=50) 
+    answer = models.CharField(max_length=50)
     tags = models.CharField(max_length=200)
+
+    def __str__(self):
+        return "{0} - {1} version: {2}".format(self.text, self.answer, self.id)
 
 class Question(models.Model):
     text = models.CharField(max_length=50)

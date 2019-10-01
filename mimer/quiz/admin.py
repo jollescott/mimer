@@ -12,5 +12,6 @@ class QuizUserAdmin(UserAdmin):
 # Register your models here.
 admin.site.register(models.QuizUser, QuizUserAdmin)
 admin.site.register(models.Test)
-admin.site.register(models.Question)
+admin.site.register(models.Alternative)
 admin.site.register(models.Answer)
+admin.site.register(models.Asset)

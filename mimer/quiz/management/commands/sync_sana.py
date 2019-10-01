@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
-from quiz.models import Question
+from quiz.models import Asset
 from sana.learn import (create_or_update_assets, LearnAsset,
-    ViewItem, LearnView, create_or_update_view)
+    ViewItem, LearnView, create_or_update_view, AssetTag)
 from sana.constants import ASSET_EXERCISE
 
 
@@ -15,10 +15,19 @@ class Command(BaseCommand):
         assets = []
         debug = options['debug']
 
-        for question in Question.objects.all():
-            tags = [question.text, question.answer_a, question.answer_b,
-                    question.answer_c, question.answer_d, question.correct]
-            asset = LearnAsset(question.id, ASSET_EXERCISE)
+        for asset in Asset.objects.all():
+            tags = None
+
+            if asset.tags is not None:
+                tags = []
+                strings = asset.tags.split(',')
+
+                i = 0
+                for tag in strings:
+                    tags.append(AssetTag('tag{0}'.format(i), tag))
+                    i = i + 1
+
+            asset = LearnAsset(asset.id, ASSET_EXERCISE, tags=tags)
             assets.append(asset)
 
             if debug:
@@ -27,8 +36,11 @@ class Command(BaseCommand):
 
         try:
             result = create_or_update_assets(assets)
-            print(result)
-        except Exception as e:
+
+            if result is False:
+                raise CommandError('Could not upload Sana Assets. Possible network error or wrong API key? ')
+
+        except:
             raise CommandError('Could not upload Sana Assets. Possible network error or wrong API key? ')
 
         view_items = [ViewItem(asset.id, '/greenlandic/{0}'.format(asset.id)) for asset in assets]

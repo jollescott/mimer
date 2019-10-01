@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from quiz.models import Question
+from quiz.models import Question, Asset, Alternative
 import os, json
 
 
@@ -38,20 +38,12 @@ class Command(BaseCommand):
 
             for question in questions:
                 try:
-                    model = Question()
-                    model.text = question['text']
-                    model.correct = question['correct']
+                    asset = Asset()
+                    asset.text = question['greenlandic']
+                    asset.answer = question['swedish']
+                    asset.tags = question['tags']
 
-                    model.answer_a = question['alternatives'][0]
-                    model.answer_b = question['alternatives'][1]
-                    model.answer_c = question['alternatives'][2]
-                    model.answer_d = question['alternatives'][3]
-                    model.answer_e = question['alternatives'][4]
-
-                    model.save()
-
-                    if debug:
-                        print('Added Question: ' + model.text)
+                    asset.save()
 
                 except Exception as e:
                     raise CommandError('Could not process JSON. Possible format error: ' + str(e))

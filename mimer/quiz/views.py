@@ -13,6 +13,7 @@ from sana.learn import (post_user_events, next_assets, UserEvent, UserEventAttri
 
 from sana.constants import EVENT_RESPONSE_SUBMIT, ASSET_EXERCISE, USER_LEARNER
 from datetime import datetime
+import random
 
 def index(request):
     if request.user.is_authenticated:
@@ -57,7 +58,7 @@ def home(request):
         return redirect('index')
 
     user = models.QuizUser.objects.get(id=user_id)
-    question_count = models.Question.objects.count()
+    question_count = models.Asset.objects.count()
 
     context = {
         'overall_score': user.overall_score,
@@ -89,14 +90,14 @@ def home(request):
 
 
 def create_test(user):
-    count = models.Question.objects.aggregate(count=Count('id'))['count']
+    count = models.Asset.objects.aggregate(count=Count('id'))['count']
 
     if count == 0:
         return None
 
     use_sana = user.sana is True
 
-    questions = []
+    asset_ids = []
 
     if use_sana:
         sana_user = SanaUser(user.id, USER_LEARNER)
@@ -110,19 +111,39 @@ def create_test(user):
 
         for asset in data['data']: 
             id = asset['asset_id']
-            question = models.Question.objects.get(id=id)
-            questions.append(question)
+            asset_ids.append(id)
 
     else:
         for i in range(0, 10):
             random_index = randint(0, count - 1)
-            question = models.Question.objects.all()[random_index]
-            questions.append(question)
+            asset_ids.append(random_index)
+
+    assets = models.Asset.objects.filter(id__in=tuple(asset_ids))
+    questions = []
+
+    for asset in assets:
+        q = models.Question()
+        q.text = asset.text
+        q.save()
+
+        questions.append(q)
+
+        alternative_assets = list(filter(lambda x: x is not asset, assets))
+        alternative_assets = random.sample(alternative_assets, 4)
+        alternative_assets.append(asset)
+        random.shuffle(alternative_assets)
+
+        for aasset in alternative_assets:
+            alternative = models.Alternative()
+            alternative.asset = aasset
+            alternative.question = q
+            alternative.correct = aasset is asset
+
+            alternative.save()
 
     test = models.Test(user=user)
     test.save()
     test.questions.set(questions)
-    test.save()
 
     return test
 
@@ -153,14 +174,15 @@ def question(request, tid, qid):
         return HttpResponse('Test does not exist.')
 
     q = test.questions.all().get(id=qid)
+    alternatives = models.Alternative.objects.filter(question=q)
 
     context = {
         'text': q.text,
-        'answer_a': q.answer_a,
-        'answer_b': q.answer_b,
-        'answer_c': q.answer_c,
-        'answer_d': q.answer_d,
-        'answer_e': q.answer_e,
+        'answer_a': alternatives[0].asset.answer,
+        'answer_b': alternatives[1].asset.answer,
+        'answer_c': alternatives[2].asset.answer,
+        'answer_d': alternatives[3].asset.answer,
+        'answer_e': alternatives[4].asset.answer,
         'question_id': q.id,
         'test_id': test.id
     }
@@ -188,7 +210,12 @@ def answer(request, tid, qid, a):
     if len(existing) > 0:
         return HttpResponse(status=403)
 
-    correct = q.correct == a
+    alternatives = models.Alternative.objects.filter(question=q)
+    
+    if len(alternatives) < a:
+        return HttpResponse(status=403)
+
+    correct = alternatives[a].correct
     time = float(time_str)
 
     a = models.Answer(correct=correct, question=q, user=user, time=time)
@@ -234,7 +261,7 @@ def answer(request, tid, qid, a):
 
     return JsonResponse({
         'link': link,
-        'correct': q.correct
+        'correct': correct
     })
 
 
@@ -270,15 +297,14 @@ def result(request, tid):
     answers = []
 
     for test_answer in test_answers:
-        alternatives = [test_answer.question.answer_a, test_answer.question.answer_b,
-                        test_answer.question.answer_c, test_answer.question.answer_d,
-                        test_answer.question.answer_e]
+        q_alternatives = models.Alternative.objects.filter(question=test_answer.question)
+        alternatives = []
 
-        for i in range(0, len(alternatives)):
-            alternatives[i] = {
-                'text': alternatives[i],
-                'correct': i == test_answer.question.correct
-            }
+        for i in range(0, len(q_alternatives)):
+            alternatives.append({
+                'text': q_alternatives[i].asset.answer,
+                'correct': q_alternatives[i].correct
+            })
 
         answers.append({
             'text': test_answer.question.text,
