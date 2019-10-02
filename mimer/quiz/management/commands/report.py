@@ -69,7 +69,7 @@ class Command(BaseCommand):
         chart.y_axis.title = 'Correct percentage'
         self.sheet.add_chart(chart, 'D{0}'.format(empty_y))
 
-        self.cursor = self.cursor + 2
+        self.cursor = test_count + self.cursor + 2
 
     def plot_timing(self):
         self.sheet['A{0}'.format(self.cursor)] = 'Date'
@@ -108,7 +108,7 @@ class Command(BaseCommand):
         chart.y_axis.title = 'Correct percentage'
         self.sheet.add_chart(chart, 'D{0}'.format(empty_y))
 
-        empty_y = self.cursor + 2
+        self.cursor = test_count + self.cursor + 2
 
     def scale_columns(self):
         for col in self.sheet.columns:
