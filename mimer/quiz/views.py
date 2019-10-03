@@ -134,7 +134,6 @@ def train(request):
         return redirect('index')
 
     try:
-        raise BaseException('shit')
         test = create_test(user)
     except BaseException as e:
         return HttpResponse('Could not retrieve questions. <a href="mailto: JoLi0125@student.grillska.se?subject=Server Fault (500)&body={0}">Please report incident.'.format(str(e)), content_type='text/html')
