@@ -171,10 +171,8 @@ class Command(BaseCommand):
             self.user = user
             self.cursor = 1
 
-            self.tests = Test.objects.filter(user=self.user).filter(
-                date__range=[self.start, self.end]).order_by('date')
-            self.answers = Answer.objects.filter(user=self.user).filter(
-                date__range=[self.start, self.end]).order_by('date')
+            self.tests = Test.objects.filter(user=self.user, complete=True).filter(date__range=[self.start, self.end]).order_by('date')
+            self.answers = Answer.objects.filter(user=self.user).filter(date__range=[self.start, self.end]).order_by('date')
 
             self.add_intro()
             self.plot_tests()

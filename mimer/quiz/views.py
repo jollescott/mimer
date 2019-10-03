@@ -133,7 +133,11 @@ def train(request):
     if user is None:
         return redirect('index')
 
-    test = create_test(user)
+    try:
+        test = create_test(user)
+    except BaseException as e:
+        return HttpResponse('Could not retrieve questions. <a href="mailto: JoLi0125@student.grillska.se?subject=Server Fault (500)&body={0}">Please report incident.'.format(str(e)), content_type='text/html')
+
 
     if test is None:
         return HttpResponse('Could not create test')
