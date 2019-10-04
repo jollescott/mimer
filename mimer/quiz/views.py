@@ -128,7 +128,7 @@ def create_test(user):
 
         questions.append(q)
 
-        alternative_assets = list(filter(lambda x: x is not asset, assets))
+        alternative_assets = list(filter(lambda x: x.id != asset.id, assets))
         alternative_assets = random.sample(alternative_assets, 4)
         alternative_assets.append(asset)
         random.shuffle(alternative_assets)
@@ -137,7 +137,7 @@ def create_test(user):
             alternative = models.Alternative()
             alternative.asset = aasset
             alternative.question = q
-            alternative.correct = aasset is asset
+            alternative.correct = aasset.id == asset.id
 
             alternative.save()
 
