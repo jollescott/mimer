@@ -49,7 +49,7 @@ def format_questions(words):
 
 
 if __name__ == "__main__":
-    if os.path.isfile('./greenlandic.xlsx'):
+    if os.path.isfile('./greenlandic-swedish.xlsx'):
         questions = scrape()
         questions = format_questions(questions)
 
