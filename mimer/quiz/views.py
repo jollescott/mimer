@@ -111,7 +111,7 @@ def create_test(user):
 
         for asset in data['data']: 
             id = asset['asset_id']
-            asset_ids.append(id)
+            asset_ids.append(int(id))
 
     else:
         for i in range(0, 10):
