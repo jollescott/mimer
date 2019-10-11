@@ -83,7 +83,7 @@ def home(request):
             tests.append(test)
 
         context['tests'] = reversed(tests)
-    except Exception as e:
+    except Exception:
         print('No tests found for user')
 
     return render(request, 'quiz/home.html', context=context)
@@ -118,18 +118,19 @@ def create_test(user):
             random_index = randint(0, count - 1)
             asset_ids.append(random_index)
 
-    assets = models.Asset.objects.filter(id__in=tuple(asset_ids))
+    assets = models.Asset.objects.all()
+    choosen_assets = [asset for asset in assets if asset.id in asset_ids]
     questions = []
 
-    for asset in assets:
+    for asset in choosen_assets:
         q = models.Question()
         q.text = asset.text
         q.save()
 
         questions.append(q)
 
-        alternative_assets = list(filter(lambda x: x.id != asset.id, assets))
-        alternative_assets = random.sample(alternative_assets, 4)
+        other_assets = [a for a in assets if asset.id != a.id ]
+        alternative_assets = random.sample(other_assets, 4)
         alternative_assets.append(asset)
         random.shuffle(alternative_assets)
 
