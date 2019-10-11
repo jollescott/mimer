@@ -219,10 +219,18 @@ def answer(request, tid, qid, a):
     if len(alternatives) < a:
         return HttpResponse(status=403)
 
-    correct = alternatives[a].correct
+    correct = 0
+
+    for alt in alternatives:
+        if alt.correct:
+            break
+        else:
+            correct = correct + 1
+
+    is_correct = a == correct
     time = float(time_str)
 
-    a = models.Answer(correct=correct, question=q, user=user, time=time)
+    a = models.Answer(correct=is_correct, question=q, user=user, time=time)
     a.save()
 
     test.answers.add(a)
@@ -243,9 +251,9 @@ def answer(request, tid, qid, a):
         test.save()
 
         answers = models.Answer.objects.filter(user=user)
-        correct = list(filter(lambda x: x.correct == True, answers))
+        is_correct = list(filter(lambda x: x.correct == True, answers))
 
-        score = len(correct) / len(answers)
+        score = len(is_correct) / len(answers)
         user.overall_score = score
         user.save()
 
@@ -257,7 +265,7 @@ def answer(request, tid, qid, a):
     if request.user.sana:
         user = SanaUser(user_id, USER_LEARNER)
 
-        result = 'correct' if correct else 'incorrect'
+        result = 'correct' if is_correct else 'incorrect'
         events = UserEventAttributes(1, qid, result, score=1, time_spent_ms=time)
 
         event = UserEvent(user, EVENT_RESPONSE_SUBMIT, events, datetime.utcnow())
