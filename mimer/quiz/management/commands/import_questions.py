@@ -23,7 +23,7 @@ class Command(BaseCommand):
         count = options['count']
 
         if init:
-            if len(Question.objects.all()) > 0:
+            if len(Asset.objects.all()) > 0:
                 print('Database has already been seeded!')
                 return
 
