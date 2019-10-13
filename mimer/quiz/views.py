@@ -90,7 +90,7 @@ def home(request):
 
 
 def create_test(user):
-    count = models.Asset.objects.aggregate(count=Count('id'))['count']
+    count = models.Asset.objects.count()
 
     if count == 0:
         return None
@@ -114,9 +114,8 @@ def create_test(user):
             asset_ids.append(int(id))
 
     else:
-        for i in range(0, 10):
-            random_index = randint(0, count - 1)
-            asset_ids.append(random_index)
+        id_range = range(1, count)
+        asset_ids = random.sample(id_range, 10)
 
     assets = models.Asset.objects.all()
     choosen_assets = [asset for asset in assets if asset.id in asset_ids]
