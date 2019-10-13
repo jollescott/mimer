@@ -73,7 +73,7 @@ class Command(BaseCommand):
 
     def plot_timing(self):
         self.sheet['A{0}'.format(self.cursor)] = 'Date'
-        self.sheet['B{0}'.format(self.cursor)] = 'Average Reaction Time'
+        self.sheet['B{0}'.format(self.cursor)] = 'Average Reaction Time (ms)'
 
         test_count = len(self.tests)
         empty_y = self.cursor + 1
@@ -105,7 +105,7 @@ class Command(BaseCommand):
 
         chart.x_axis.number_format = 'dd mm yyyy HH:MM'
         chart.x_axis.title = 'Date'
-        chart.y_axis.title = 'Correct percentage'
+        chart.y_axis.title = 'Time (ms)'
         self.sheet.add_chart(chart, 'D{0}'.format(empty_y))
 
         self.cursor = test_count + self.cursor + 2
@@ -136,7 +136,7 @@ class Command(BaseCommand):
         end_str = options['end']
 
         usernames = options['user']
-        all = options['all']
+        all_users = options['all']
         debug = options['debug']
 
         naive_start = dateparser.parse(start_str)
@@ -147,7 +147,7 @@ class Command(BaseCommand):
 
         users = []
 
-        if all:
+        if all_users:
             users = QuizUser.objects.all()
         else:
             for username in usernames:
