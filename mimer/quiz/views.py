@@ -52,12 +52,11 @@ def logout(request):
 
 
 def home(request):
-    user_id = request.user.id
+    user = request.user
 
-    if user_id is None:
+    if user is None:
         return redirect('index')
 
-    user = models.QuizUser.objects.get(id=user_id)
     question_count = models.Asset.objects.count()
 
     context = {
@@ -195,23 +194,22 @@ def question(request, tid, qid):
 
 @csrf_exempt
 def answer(request, tid, qid, a):
-    user_id = request.user.id
+    user = request.user
     time_str = request.GET.get('time', 0)
 
-    if user_id is None:
+    if user is None:
         return HttpResponse(status=401)
 
-    user = models.QuizUser.objects.get(id=user_id)
     test = models.Test.objects.get(id=tid)
 
     if test is None:
         return HttpResponse(status=404)
 
-    q = test.questions.all().get(id=qid)
+    q = models.Question.objects.get(id=qid)
 
-    existing = test.answers.all().filter(question=q)
+    existing = models.Answer.objects.filter(question=q).count()
 
-    if len(existing) > 0:
+    if existing > 0:
         return HttpResponse(status=403)
 
     alternatives = models.Alternative.objects.filter(question=q)

@@ -41,7 +41,7 @@ class Test(models.Model):
     questions = models.ManyToManyField(Question)
     answers = models.ManyToManyField(Answer)
     user = models.ForeignKey(QuizUser, on_delete=models.CASCADE)
-    date = models.DateTimeField(auto_now=True)
+    date = models.DateTimeField(auto_now_add=True)
     complete = models.BooleanField(default=False)
 
     def __str__(self):
