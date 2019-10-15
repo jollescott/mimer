@@ -264,7 +264,7 @@ def answer(request, tid, qid, a):
         link = '/test/{0}/{1}'.format(test.id, nq.id)
 
     if request.user.sana:
-        user = SanaUser(user_id, USER_LEARNER)
+        user = SanaUser(user.id, USER_LEARNER)
 
         result = 'correct' if is_correct else 'incorrect'
         events = UserEventAttributes(1, qid, result, score=1, time_spent_ms=time)
