@@ -121,8 +121,11 @@ def create_test(user):
     questions = []
 
     for asset in choosen_assets:
+        switch = randint(0,1) < 1
+
         q = models.Question()
-        q.text = asset.text
+        q.text = asset.answer if switch else asset.text
+        q.switch = switch
         q.save()
 
         questions.append(q)
@@ -181,11 +184,11 @@ def question(request, tid, qid):
 
     context = {
         'text': q.text,
-        'answer_a': alternatives[0].asset.answer,
-        'answer_b': alternatives[1].asset.answer,
-        'answer_c': alternatives[2].asset.answer,
-        'answer_d': alternatives[3].asset.answer,
-        'answer_e': alternatives[4].asset.answer,
+        'answer_a': alternatives[0].asset.text if q.switch else alternatives[0].asset.answer,
+        'answer_b': alternatives[1].asset.text if q.switch else alternatives[1].asset.answer,
+        'answer_c': alternatives[2].asset.text if q.switch else alternatives[2].asset.answer,
+        'answer_d': alternatives[3].asset.text if q.switch else alternatives[3].asset.answer,
+        'answer_e': alternatives[4].asset.text if q.switch else alternatives[4].asset.answer,
         'question_id': q.id,
         'test_id': test.id
     }

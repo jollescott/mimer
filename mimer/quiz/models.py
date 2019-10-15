@@ -17,6 +17,7 @@ class Asset(models.Model):
 
 class Question(models.Model):
     text = models.CharField(max_length=50)
+    switch = models.BooleanField(default=False)
 
     def __str__(self):
         return self.text
