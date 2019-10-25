@@ -350,3 +350,11 @@ def result(request, tid):
     }
 
     return render(request, 'quiz/result.html', context=context)
+
+def asset(request, aid): 
+    asset = models.Asset.objects.get(id=aid)
+
+    if asset:
+        return HttpResponse('{0}: {1}'.format(asset.text, asset.answer))
+    else:
+        return HttpResponse(status=404)

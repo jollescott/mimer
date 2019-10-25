@@ -27,7 +27,9 @@ class Command(BaseCommand):
                     tags.append(AssetTag('tag{0}'.format(i), tag))
                     i = i + 1
 
-            asset = LearnAsset(asset.id, ASSET_EXERCISE, tags=tags, description=asset.text)
+            asset = LearnAsset(asset.id, ASSET_EXERCISE, tags=tags, description=asset.text,
+                               content_url='https://frogor.herokuapp.com/asset/{0}'.format(asset.id))
+                               
             assets.append(asset)
 
             if debug:
