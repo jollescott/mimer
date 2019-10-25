@@ -160,7 +160,7 @@ class Command(BaseCommand):
         if os.path.exists('reports') is not True:
             os.mkdir('reports')
 
-        timestamp = datetime.datetime.now().isoformat()
+        timestamp = int(datetime.datetime.now().timestamp())
         os.mkdir('reports/{0}'.format(timestamp))
 
         for user in users:
