@@ -15,6 +15,7 @@ from sana.constants import EVENT_RESPONSE_SUBMIT, ASSET_EXERCISE, USER_LEARNER
 from datetime import datetime
 import random
 
+
 def index(request):
     if request.user.is_authenticated:
         return redirect('home')
@@ -97,6 +98,7 @@ def create_test(user):
     use_sana = user.sana is True
 
     asset_ids = []
+    recommendation_contexts = {}
 
     if use_sana:
         sana_user = SanaUser(user.id, USER_LEARNER)
@@ -108,9 +110,10 @@ def create_test(user):
 
         data = next_assets(sana_user, 1, asset_filter, mode, 10)
 
-        for asset in data['data']: 
+        for asset in data['data']:
             id = asset['asset_id']
             asset_ids.append(int(id))
+            recommendation_contexts[str(id)] = asset['recommendation_context']
 
     else:
         id_range = range(1, count)
@@ -121,16 +124,20 @@ def create_test(user):
     questions = []
 
     for asset in choosen_assets:
-        switch = randint(0,1) < 1
+        switch = randint(0, 1) < 1
 
         q = models.Question()
         q.text = asset.answer if switch else asset.text
         q.switch = switch
+
+        if str(asset.id) in recommendation_contexts:
+            q.recommendation_context = recommendation_contexts[str(asset.id)]
+
         q.save()
 
         questions.append(q)
 
-        other_assets = [a for a in assets if asset.id != a.id ]
+        other_assets = [a for a in assets if asset.id != a.id]
         alternative_assets = random.sample(other_assets, 4)
         alternative_assets.append(asset)
         random.shuffle(alternative_assets)
@@ -160,7 +167,6 @@ def train(request):
         test = create_test(user)
     except BaseException as e:
         return HttpResponse('Could not retrieve questions. <a href="mailto: JoLi0125@student.grillska.se?subject=Server Fault (500)&body={0}">Please report incident.'.format(str(e)), content_type='text/html')
-
 
     if test is None:
         return HttpResponse('Could not create test')
@@ -195,6 +201,7 @@ def question(request, tid, qid):
 
     return render(request, 'quiz/question.html', context=context)
 
+
 @csrf_exempt
 def answer(request, tid, qid, a):
     user = request.user
@@ -216,7 +223,7 @@ def answer(request, tid, qid, a):
         return HttpResponse(status=403)
 
     alternatives = models.Alternative.objects.filter(question=q)
-    
+
     if len(alternatives) < a:
         return HttpResponse(status=403)
 
@@ -267,9 +274,15 @@ def answer(request, tid, qid, a):
         user = SanaUser(user.id, USER_LEARNER)
 
         result = 'correct' if is_correct else 'incorrect'
-        events = UserEventAttributes(1, qid, result, score=1, time_spent_ms=time)
+        events = UserEventAttributes(
+            1, qid, result, score=1, time_spent_ms=time)
 
-        event = UserEvent(user, EVENT_RESPONSE_SUBMIT, events, datetime.utcnow())
+        event = UserEvent(user, EVENT_RESPONSE_SUBMIT,
+                          events, datetime.utcnow())
+
+        if q.recommendation_context:
+            event.recommendation_context = q.recommendation_context
+
         result = post_user_events([event])
 
     return JsonResponse({
@@ -310,7 +323,8 @@ def result(request, tid):
     answers = []
 
     for test_answer in test_answers:
-        q_alternatives = models.Alternative.objects.filter(question=test_answer.question)
+        q_alternatives = models.Alternative.objects.filter(
+            question=test_answer.question)
         alternatives = []
 
         for i in range(0, len(q_alternatives)):

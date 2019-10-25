@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from quiz.models import Asset
 from sana.learn import (create_or_update_assets, LearnAsset,
-    ViewItem, LearnView, create_or_update_view, AssetTag)
+                        ViewItem, LearnView, create_or_update_view, AssetTag)
 from sana.constants import ASSET_EXERCISE
 
 
@@ -27,7 +27,7 @@ class Command(BaseCommand):
                     tags.append(AssetTag('tag{0}'.format(i), tag))
                     i = i + 1
 
-            asset = LearnAsset(asset.id, ASSET_EXERCISE, tags=tags)
+            asset = LearnAsset(asset.id, ASSET_EXERCISE, tags=tags, description=asset.text)
             assets.append(asset)
 
             if debug:
@@ -38,12 +38,14 @@ class Command(BaseCommand):
             result = create_or_update_assets(assets)
 
             if result is False:
-                raise CommandError('Could not upload Sana Assets. Possible network error or wrong API key? ')
+                raise CommandError(
+                    'Could not upload Sana Assets. Possible network error or wrong API key? ')
 
         except:
-            raise CommandError('Could not upload Sana Assets. Possible network error or wrong API key? ')
+            raise CommandError(
+                'Could not upload Sana Assets. Possible network error or wrong API key? ')
 
-        view_items = [ViewItem(asset.id, '/greenlandic/{0}'.format(asset.id)) for asset in assets]
+        view_items = [
+            ViewItem(asset.id, '/greenlandic/{0}'.format(asset.id)) for asset in assets]
         view = LearnView('greenlandic', view_items, path='/greenlandic')
         create_or_update_view(1, view)
-        
