@@ -139,8 +139,8 @@ class Command(BaseCommand):
         all_users = options['all']
         debug = options['debug']
 
-        naive_start = dateparser.parse(start_str)
-        naive_end = dateparser.parse(end_str)
+        naive_start = dateparser.parse(start_str, settings={'DATE_ORDER': 'DMY'})
+        naive_end = dateparser.parse(end_str, settings={'DATE_ORDER': 'DMY'})
 
         self.start = naive_start.replace(tzinfo=datetime.timezone.utc)
         self.end = naive_end.replace(tzinfo=datetime.timezone.utc)
