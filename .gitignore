@@ -6,3 +6,4 @@ mimer/mimer/settings/sensitive/
 mimer/staticfiles/
 mimer/reports/
 *.xlsx
+mimer/.vscode/settings.json

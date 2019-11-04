@@ -19,6 +19,7 @@ class Question(models.Model):
     text = models.CharField(max_length=50)
     switch = models.BooleanField(default=False)
     recommendation_context = models.CharField(max_length=100, blank=True)
+    asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.text
