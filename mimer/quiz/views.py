@@ -129,6 +129,7 @@ def create_test(user):
         q = models.Question()
         q.text = asset.answer if switch else asset.text
         q.switch = switch
+        q.asset = asset
 
         if str(asset.id) in recommendation_contexts:
             q.recommendation_context = recommendation_contexts[str(asset.id)]
@@ -275,7 +276,7 @@ def answer(request, tid, qid, a):
 
         result = 'correct' if is_correct else 'incorrect'
         events = UserEventAttributes(
-            1, qid, result, score=1, time_spent_ms=time)
+            1, q.asset.id, result, score=1, time_spent_ms=time)
 
         event = UserEvent(user, EVENT_RESPONSE_SUBMIT,
                           events, datetime.utcnow())
@@ -284,6 +285,7 @@ def answer(request, tid, qid, a):
             event.recommendation_context = q.recommendation_context
 
         result = post_user_events([event])
+        print(result)
 
     return JsonResponse({
         'link': link,
