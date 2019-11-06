@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from quiz.models import QuizUser, Test, Answer
+from quiz.models import QuizUser, Test, Answer, Asset
 import os
 import dateparser
 import dateparser
@@ -22,11 +22,22 @@ class Command(BaseCommand):
         self.sheet['C1'] = 'Completed quizzes'
         self.sheet['C2'] = len(self.tests)
 
-        correct = list(filter(lambda x: x.correct == True, self.answers))
+        self.sheet['D1'] = 'Content coverage'
 
-        self.sheet['D1'] = 'Correct ratio'
+        covered_ids = [answer.question.asset.id for answer in self.answers]
+        covered_ids = set(covered_ids)
+        
+        print(len(covered_ids))
+        print(len(self.asset_ids))
+
+        missed_ids = [a for a in self.asset_ids if a not in covered_ids]
+
+        for missed_id in missed_ids:
+            missed = Asset.objects.get(id=missed_id)
+            print("{} - {}".format(missed.text, missed.answer))
+
         self.sheet['D2'] = len(
-            correct) / len(self.answers) if len(self.answers) > 0 else 0
+            covered_ids) / len(self.asset_ids) if len(self.asset_ids) > 0 else 0
 
         self.sheet['E1'] = 'Sana?'
         self.sheet['E2'] = str(self.user.sana)
@@ -139,11 +150,14 @@ class Command(BaseCommand):
         all_users = options['all']
         debug = options['debug']
 
-        naive_start = dateparser.parse(start_str, settings={'DATE_ORDER': 'DMY'})
+        naive_start = dateparser.parse(
+            start_str, settings={'DATE_ORDER': 'DMY'})
         naive_end = dateparser.parse(end_str, settings={'DATE_ORDER': 'DMY'})
 
         self.start = naive_start.replace(tzinfo=datetime.timezone.utc)
         self.end = naive_end.replace(tzinfo=datetime.timezone.utc)
+
+        self.asset_ids = Asset.objects.values_list('id', flat=True)
 
         users = []
 
@@ -171,8 +185,10 @@ class Command(BaseCommand):
             self.user = user
             self.cursor = 1
 
-            self.tests = Test.objects.filter(user=self.user, complete=True).filter(date__range=[self.start, self.end]).order_by('date')
-            self.answers = Answer.objects.filter(user=self.user).filter(date__range=[self.start, self.end]).order_by('date')
+            self.tests = Test.objects.filter(user=self.user, complete=True).filter(
+                date__range=[self.start, self.end]).order_by('date')
+            self.answers = Answer.objects.filter(user=self.user).filter(
+                date__range=[self.start, self.end]).order_by('date')
 
             self.add_intro()
             self.plot_tests()
