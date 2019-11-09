@@ -10,7 +10,7 @@ ENV PYTHONUNBUFFERED 1
 ENV DEBUG 0
 
 RUN apk update \
-    && apk add build-base gcc python3-dev 
+    && apk add build-base gcc python3-dev libffi-dev
 
 RUN apk add postgresql-dev --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main
 
