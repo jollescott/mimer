@@ -3,7 +3,7 @@ from .base import *
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['frogor.herokuapp.com', 'frogor.joellinder.dev']
+ALLOWED_HOSTS = ['*']
 
 sensitive = load_sensitve('production')
 SECRET_KEY = sensitive['SECRET_KEY']
