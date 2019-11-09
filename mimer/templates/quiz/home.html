@@ -37,10 +37,9 @@
         <h2>Your score: {{ overall_score }} </h2>
         <div>
             <a href="/train" class="btn btn-primary" style="float: left; margin: 5px">Train</a>
-            <!--<a href="/train" class="btn btn-secondary" style="float: left; margin: 5px">Train</a>-->
         </div>
         
-        <!--<p style="clear: both;">Test runs does not count into your overall score.</p>-->
+        <p style="clear: both;">Tillåt <strong>notifikationer</strong> för att slippa <br> komma ihåg testen själv 🧠</p>
     </div>
 
     <div class="menu-container">
@@ -61,5 +60,8 @@
         {% endfor %}
     </div>
 </div>
+
+{% load static %}
+<script src="{% static '/js/registerSw.js' %}"></script>
 
 {% endblock %}

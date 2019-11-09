@@ -55,7 +55,7 @@ def logout(request):
 def home(request):
     user = request.user
 
-    if user is None:
+    if user.is_authenticated is False:
         return redirect('index')
 
     question_count = models.Asset.objects.count()

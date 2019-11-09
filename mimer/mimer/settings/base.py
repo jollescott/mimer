@@ -24,7 +24,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'quiz'
+    'quiz',
+    'webpush'
 ]
 
 MIDDLEWARE = [
@@ -51,6 +52,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'mimer.context_processors.inject_vapid'
             ],
         },
     },
@@ -77,6 +79,12 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+WEBPUSH_SETTINGS = {
+   "VAPID_PUBLIC_KEY": "BABshYjn3FSY1eEGqi9BRFqIHT27I8JH-PieUm9YPjiQ02xUMg8IXxQw1E7IgNX03Z06Gd5wlfmnM0Q0U9guB_A",
+   "VAPID_PRIVATE_KEY": "JokIMtx6oF47hnEoI70kAYLbHcaA4rO0lBeG34NNFgk",
+   "VAPID_ADMIN_EMAIL": "JoLi0125@student.grillska.se"
+}
 
 
 # Internationalization
