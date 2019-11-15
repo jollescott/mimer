@@ -26,15 +26,11 @@ class Command(BaseCommand):
 
         covered_ids = [answer.question.asset.id for answer in self.answers]
         covered_ids = set(covered_ids)
-        
-        print(len(covered_ids))
-        print(len(self.asset_ids))
 
         missed_ids = [a for a in self.asset_ids if a not in covered_ids]
 
         for missed_id in missed_ids:
             missed = Asset.objects.get(id=missed_id)
-            print("{} - {}".format(missed.text, missed.answer))
 
         self.sheet['D2'] = len(
             covered_ids) / len(self.asset_ids) if len(self.asset_ids) > 0 else 0

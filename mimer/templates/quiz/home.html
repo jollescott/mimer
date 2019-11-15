@@ -10,7 +10,7 @@
 {% block content %}
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="#">Ordförståelse: {{ question_count }} Questions</a>
+    <a class="navbar-brand" href="#">Ordförståelse: {{ question_count }} frågor</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -20,7 +20,7 @@
         <p class="navbar-nav mr-auto">
         </p>
         <div class="form-inline my-2 my-lg-0">
-            <a href="/logout" class="btn btn-outline-danger my-2 my-sm-0" type="submit">Logout</a>
+            <a href="/logout" class="btn btn-outline-danger my-2 my-sm-0" type="submit">Logga ut</a>
         </form>
     </div>
 </nav>
@@ -34,16 +34,16 @@
             <strong>{{ name }}</strong>
         </div>
 
-        <h2>Your score: {{ overall_score }} </h2>
+        <h2>Ditt jämförelsetal: {{ overall_score }} </h2>
         <div>
-            <a href="/train" class="btn btn-primary" style="float: left; margin: 5px">Train</a>
+            <a href="/train" class="btn btn-primary" style="float: left; margin: 5px">Öva</a>
         </div>
         
         <p style="clear: both;">Tillåt <strong>notifikationer</strong> för att slippa <br> komma ihåg testen själv 🧠</p>
     </div>
 
     <div class="menu-container">
-        <h2>Your tests</h2>
+        <h2>Dina test</h2>
         {% for test in tests %}
             <div class="test">
                 <div class="test-details">
@@ -52,9 +52,9 @@
                 </div>
 
                 {% if test.complete %}
-                    <p class="continue" style="color: green">Done</p>
+                    <p class="continue" style="color: green">Klar</p>
                 {% else %}
-                    <a href="/resume/{{ test.id }}" class="btn btn-primary continue" type="submit">Continue</a>
+                    <a href="/resume/{{ test.id }}" class="btn btn-primary continue" type="submit">Fortsätt</a>
                 {% endif %}
             </div>
         {% endfor %}
