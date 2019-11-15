@@ -135,6 +135,7 @@ class Command(BaseCommand):
         parser.add_argument('end', type=str)
 
         parser.add_argument('-u', '--user', nargs='+', type=str)
+        parser.add_argument('-e', '--exclude', nargs='+', type=str)
         parser.add_argument('-a', '--all', action='store_true')
         parser.add_argument('-d', '--debug', action='store_true')
 
@@ -143,11 +144,11 @@ class Command(BaseCommand):
         end_str = options['end']
 
         usernames = options['user']
+        excluded = options['exclude']
         all_users = options['all']
         debug = options['debug']
 
-        naive_start = dateparser.parse(
-            start_str, settings={'DATE_ORDER': 'DMY'})
+        naive_start = dateparser.parse(start_str, settings={'DATE_ORDER': 'DMY'})
         naive_end = dateparser.parse(end_str, settings={'DATE_ORDER': 'DMY'})
 
         self.start = naive_start.replace(tzinfo=datetime.timezone.utc)
@@ -166,6 +167,9 @@ class Command(BaseCommand):
                 except BaseException:
                     raise CommandError(
                         'Error: user not found for username ' + username)
+
+        if excluded:
+            users = [user for user in users if user.username not in excluded]
 
         if os.path.exists('reports') is not True:
             os.mkdir('reports')
