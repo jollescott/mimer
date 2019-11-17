@@ -248,7 +248,8 @@ def answer(request, tid, qid, a):
     question_ids = test.questions.all().values_list('id', flat=True)
     answered_ids = [answer.question.id for answer in test.answers.all()]
 
-    unanswered_ids = [question_id for question_id in question_ids if question_id not in answered_ids]
+    unanswered_ids = [
+        question_id for question_id in question_ids if question_id not in answered_ids]
 
     link = ""
 
@@ -304,7 +305,8 @@ def resume(request, tid):
     question_ids = test.questions.all().values_list('id', flat=True)
     answered_ids = [answer.question.id for answer in test.answers.all()]
 
-    unanswered_ids = [question_id for question_id in question_ids if question_id not in answered_ids]
+    unanswered_ids = [
+        question_id for question_id in question_ids if question_id not in answered_ids]
 
     if len(unanswered_ids) <= 0:
         return HttpResponse('Test has already been completed')
@@ -323,6 +325,7 @@ def result(request, tid):
     for test_answer in test_answers:
         q_alternatives = models.Alternative.objects.filter(
             question=test_answer.question)
+
         alternatives = []
         switch = test_answer.question.switch
 
@@ -350,7 +353,8 @@ def result(request, tid):
 
     return render(request, 'quiz/result.html', context=context)
 
-def asset(request, aid): 
+
+def asset(request, aid):
     asset = models.Asset.objects.get(id=aid)
 
     if asset:
