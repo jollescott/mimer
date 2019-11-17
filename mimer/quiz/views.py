@@ -246,16 +246,14 @@ def answer(request, tid, qid, a):
     test.save()
 
     index = 0
-    qs = test.questions.all()
+    question_ids = test.questions.all().values_list('id', flat=True)
+    answered_ids = [answer.question.id for answer in test.answers.all()]
 
-    for qc in qs:
-        index += 1
-        if qc.id == q.id:
-            break
+    unanswered_ids = [question_id for question_id in question_ids if question_id not in answered_ids]
 
     link = ""
 
-    if index >= test.questions.count():
+    if len(unanswered_ids) <= 0:
         test.complete = True
         test.save()
 
@@ -268,7 +266,7 @@ def answer(request, tid, qid, a):
 
         link = '/result/{0}?completed=true'.format(test.id)
     else:
-        nq = qs[index]
+        nq = test.questions.get(id=unanswered_ids[0])
         link = '/test/{0}/{1}'.format(test.id, nq.id)
 
     if request.user.sana:
