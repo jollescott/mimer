@@ -245,7 +245,6 @@ def answer(request, tid, qid, a):
     test.answers.add(a)
     test.save()
 
-    index = 0
     question_ids = test.questions.all().values_list('id', flat=True)
     answered_ids = [answer.question.id for answer in test.answers.all()]
 
@@ -302,16 +301,15 @@ def resume(request, tid):
     if test is None:
         return HttpResponse('Test does not exist.')
 
-    questions = test.questions.all()
-    answer_index = len(test.answers.all())
+    question_ids = test.questions.all().values_list('id', flat=True)
+    answered_ids = [answer.question.id for answer in test.answers.all()]
 
-    if answer_index >= len(questions):
-        print('Answer index problem')
-        answer_index = len(questions) - 1
+    unanswered_ids = [question_id for question_id in question_ids if question_id not in answered_ids]
 
-    q = questions[answer_index]
+    if len(unanswered_ids) <= 0:
+        return HttpResponse('Test has already been completed')
 
-    return redirect('/test/{0}/{1}'.format(test.id, q.id))
+    return redirect('/test/{0}/{1}'.format(test.id, unanswered_ids[0]))
 
 
 def result(request, tid):
