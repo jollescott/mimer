@@ -324,15 +324,16 @@ def result(request, tid):
         q_alternatives = models.Alternative.objects.filter(
             question=test_answer.question)
         alternatives = []
+        switch = test_answer.question.switch
 
         for i in range(0, len(q_alternatives)):
             alternatives.append({
-                'text': q_alternatives[i].asset.answer,
+                'text': q_alternatives[i].asset.text if switch else q_alternatives[i].asset.answer,
                 'correct': q_alternatives[i].correct
             })
 
         answers.append({
-            'text': test_answer.question.text,
+            'text': test_answer.question.asset.answer if switch else test_answer.question.text,
             'correct': test_answer.correct,
             'alternatives': alternatives
         })
