@@ -162,6 +162,7 @@ class Command(BaseCommand):
                 dates.append(test['date'].date())
 
         dates = set(dates)
+        dates = sorted(dates)
 
         for date in dates:
             date_tests = []
@@ -317,7 +318,7 @@ class Command(BaseCommand):
 
         if sana_users:
             result = self.create_average_result(
-                'normal_sana', True, sana_users)
+                'sana_average', True, sana_users)
             results.append(result)
 
         for result in results:
