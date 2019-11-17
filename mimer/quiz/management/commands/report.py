@@ -1,10 +1,11 @@
 from django.core.management.base import BaseCommand, CommandError
 from quiz.models import QuizUser, Test, Answer, Asset
+from datetime import datetime, timezone
 import os
 import dateparser
 import dateparser
-import datetime
 import openpyxl
+import statistics
 
 
 class Result():
@@ -25,24 +26,22 @@ class Command(BaseCommand):
     help = 'Generate report for User'
 
     def add_intro(self):
-        self.sheet.title = self.user.username
+        self.sheet.title = self.current_result.username
 
         self.sheet['A1'] = 'Name'
-        self.sheet['A2'] = self.user.username
+        self.sheet['A2'] = self.current_result.username
 
         self.sheet['B1'] = 'Final Score'
-        self.sheet['B2'] = self.user.overall_score
+        self.sheet['B2'] = self.current_result.score
 
         self.sheet['C1'] = 'Completed quizzes'
-        self.sheet['C2'] = len(self.tests)
+        self.sheet['C2'] = self.current_result.completed_quizzes
 
         self.sheet['D1'] = 'Content coverage'
-
-        self.sheet['D2'] = len(
-            covered_ids) / len(self.asset_ids) if len(self.asset_ids) > 0 else 0
+        self.sheet['D2'] = self.current_result.content_coverage
 
         self.sheet['E1'] = 'Sana?'
-        self.sheet['E2'] = str(self.user.sana)
+        self.sheet['E2'] = str(self.current_result.sana)
 
         self.cursor = 4
 
@@ -51,18 +50,15 @@ class Command(BaseCommand):
         self.sheet['A{0}'.format(self.cursor)] = 'Date'
         self.sheet['B{0}'.format(self.cursor)] = 'Correct percentage'
 
-        test_count = len(self.tests)
+        test_count = len(self.current_result.test_results)
         empty_y = self.cursor + 1
 
         for i in range(0, test_count):
-            test = self.tests[i]
-            answers = test.answers.all()
-            correct = list(filter(lambda x: x.correct == True, answers))
+            test = self.current_result.test_results[i]
 
             self.sheet['A{0}'.format(
-                i + empty_y)] = test.date.strftime("%d %m %Y %H:%M")
-            self.sheet['B{0}'.format(i + empty_y)] = len(correct) / \
-                len(answers) if len(answers) > 0 else 0
+                i + empty_y)] = test['date'].strftime("%d %m %Y %H:%M")
+            self.sheet['B{0}'.format(i + empty_y)] = test['score']
 
             self.cursor = self.cursor + 1
 
@@ -88,20 +84,14 @@ class Command(BaseCommand):
         self.sheet['A{0}'.format(self.cursor)] = 'Date'
         self.sheet['B{0}'.format(self.cursor)] = 'Average Reaction Time (ms)'
 
-        test_count = len(self.tests)
+        test_count = len(self.current_result.reaction_times)
         empty_y = self.cursor + 1
 
         for i in range(0, test_count):
-            test = self.tests[i]
-            answers = test.answers.all()
-            reaction_times = [answer.time for answer in answers]
-
-            reaction_average = sum(
-                reaction_times) / len(reaction_times) if len(reaction_times) > 0 else 0
-
+            reaction_time = self.current_result.reaction_times[i]
             self.sheet['A{0}'.format(
-                i + empty_y)] = test.date.strftime("%d %m %Y %H:%M")
-            self.sheet['B{0}'.format(i + empty_y)] = reaction_average
+                i + empty_y)] = reaction_time['date'].strftime("%d %m %Y %H:%M")
+            self.sheet['B{0}'.format(i + empty_y)] = reaction_time['score']
 
             self.cursor = self.cursor + 1
 
@@ -136,7 +126,7 @@ class Command(BaseCommand):
             adjusted_width = (max_length + 2) * 1.2
             self.sheet.column_dimensions[column].width = adjusted_width
 
-    def produce_report(self, result):
+    def produce_report(self):
         wb = openpyxl.Workbook()
         sheet = wb.active
 
@@ -148,7 +138,63 @@ class Command(BaseCommand):
         self.plot_timing()
 
         self.scale_columns()
-        wb.save('reports/{0}/{1}.xlsx'.format(self.timestamp, result.username))
+        wb.save('reports/{0}/{1}.xlsx'.format(self.timestamp,
+                                              self.current_result.username))
+
+    def create_average_result(self, username, sana, user_group):
+        result = Result(username, sana)
+
+        result.score = statistics.median(
+            [user.score for user in user_group])
+
+        result.content_coverage = statistics.median(
+            [user.content_coverage for user in user_group])
+
+        result.completed_quizzes = statistics.median(
+            [user.completed_quizzes for user in user_group])
+
+        result.test_results = []
+
+        dates = []
+
+        for user in user_group:
+            for test in user.test_results:
+                dates.append(test['date'].date())
+
+        dates = set(dates)
+
+        for date in dates:
+            date_tests = []
+
+            for user in user_group:
+                for test in user.test_results:
+                    if test['date'].date() == date:
+                        date_tests.append(test)
+
+            test_scores = [test['score'] for test in date_tests]
+            median = statistics.median(test_scores)
+
+            result.test_results.append({
+                'date': datetime.combine(date, datetime.min.time()),
+                'score': median
+            })
+
+            date_reactions = []
+
+            for user in user_group:
+                for reaction_time in user.reaction_times:
+                    if reaction_time['date'].date() == date:
+                        date_reactions.append(reaction_time)
+
+            reaction_times = [reaction['score'] for reaction in date_reactions]
+            median = statistics.median(reaction_times)
+
+            result.reaction_times.append({
+                'date': datetime.combine(date, datetime.min.time()),
+                'score': median
+            })
+
+        return result
 
     def add_arguments(self, parser):
         parser.add_argument('start', type=str)
@@ -173,8 +219,8 @@ class Command(BaseCommand):
             start_str, settings={'DATE_ORDER': 'DMY'})
         naive_end = dateparser.parse(end_str, settings={'DATE_ORDER': 'DMY'})
 
-        self.start = naive_start.replace(tzinfo=datetime.timezone.utc)
-        self.end = naive_end.replace(tzinfo=datetime.timezone.utc)
+        self.start = naive_start.replace(tzinfo=timezone.utc)
+        self.end = naive_end.replace(tzinfo=timezone.utc)
 
         # Assets
         self.asset_ids = Asset.objects.values_list('id', flat=True)
@@ -185,6 +231,10 @@ class Command(BaseCommand):
         if all_users:
             users = QuizUser.objects.all()
         else:
+            if usernames is None:
+                raise CommandError(
+                    'Error: no users were passed')
+
             for username in usernames:
                 try:
                     users.append(QuizUser.objects.get(username=username))
@@ -199,7 +249,7 @@ class Command(BaseCommand):
         if os.path.exists('reports') is not True:
             os.mkdir('reports')
 
-        self.timestamp = int(datetime.datetime.now().timestamp())
+        self.timestamp = int(datetime.now().timestamp())
         os.mkdir('reports/{0}'.format(self.timestamp))
 
         # Load user results
@@ -208,25 +258,69 @@ class Command(BaseCommand):
         for user in users:
             result = Result(user.username, user.sana)
 
-            tests = Test.objects.filter(user=self.user, complete=True).filter(
+            # Load all completed tests in date range
+            tests = Test.objects.filter(user=user, complete=True).filter(
                 date__range=[self.start, self.end]).order_by('date')
 
-            answers = Answer.objects.filter(user=self.user).filter(
+            # Load all answers
+            answers = Answer.objects.filter(user=user).filter(
                 date__range=[self.start, self.end]).order_by('date')
 
             result.score = user.overall_score
             result.completed_quizzes = len(tests)
 
-            covered_ids = [answer.question.asset.id for answer in self.answers]
+            # Which percentage of the assets has the user trained on?
+            covered_ids = [answer.question.asset.id for answer in answers]
             covered_ids = set(covered_ids)
 
             result.content_coverage = len(
                 covered_ids) / len(self.asset_ids) if len(self.asset_ids) > 0 else 0
 
-            result.test_results = [{
+            # Score and reaction time results
+            result.test_results = []
+            result.reaction_times = []
 
-            } for test in tests]
+            for test in tests:
+                test_answers = test.answers.all()
 
-            result.reaction_times = [{
+                # Correct ratio
+                correct = list(
+                    filter(lambda x: x.correct == True, test_answers))
+                score = len(correct) / \
+                    len(test_answers) if len(test_answers) > 0 else 0
 
-            } for answer in answers]
+                result.test_results.append({
+                    "date": test.date,
+                    "score": score
+                })
+
+                # Median of reaction times
+                reaction_times = [answer.time for answer in test_answers]
+                reaction_average = statistics.median(reaction_times)
+
+                result.reaction_times.append({
+                    "date": test.date,
+                    "score": reaction_average
+                })
+
+            results.append(result)
+            print('[DONE] result generated for {}'.format(user.username))
+
+        normal_users = [
+            result for result in results if result.sana is not True]
+        sana_users = [result for result in results if result.sana]
+
+        if normal_users:
+            result = self.create_average_result(
+                'normal_average', False, normal_users)
+            results.append(result)
+
+        if sana_users:
+            result = self.create_average_result(
+                'normal_sana', True, sana_users)
+            results.append(result)
+
+        for result in results:
+            self.current_result = result
+            self.produce_report()
+            print('[DONE] Report produced for {}'.format(result.username))
