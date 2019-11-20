@@ -6,7 +6,8 @@ import dateparser
 import dateparser
 import openpyxl
 import statistics
-
+import random
+import string
 
 class Result():
     def __init__(self, username, sana):
@@ -24,6 +25,9 @@ class Result():
 
 class Command(BaseCommand):
     help = 'Generate report for User'
+
+    def random_string(self):
+        return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
     def add_intro(self):
         self.sheet.title = self.current_result.username
@@ -205,6 +209,7 @@ class Command(BaseCommand):
         parser.add_argument('-e', '--exclude', nargs='+', type=str)
         parser.add_argument('-a', '--all', action='store_true')
         parser.add_argument('-d', '--debug', action='store_true')
+        parser.add_argument('-an', '--anon', action='store_true')
 
     def handle(self, *args, **options):
         # Load options
@@ -214,6 +219,7 @@ class Command(BaseCommand):
         usernames = options['user']
         excluded = options['exclude']
         all_users = options['all']
+        anon = options['anon']
 
         # Timing
         naive_start = dateparser.parse(
@@ -257,7 +263,7 @@ class Command(BaseCommand):
         results = []
 
         for user in users:
-            result = Result(user.username, user.sana)
+            result = Result(self.random_string() if anon else user.username, user.sana)
 
             # Load all completed tests in date range
             tests = Test.objects.filter(user=user, complete=True).filter(
