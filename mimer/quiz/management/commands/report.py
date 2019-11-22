@@ -154,7 +154,7 @@ class Command(BaseCommand):
         result.content_coverage = statistics.mean(
             [user.content_coverage for user in user_group])
 
-        result.completed_quizzes = statistics.mean(
+        result.completed_quizzes = statistics.median(
             [user.completed_quizzes for user in user_group])
 
         result.test_results = []
