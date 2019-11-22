@@ -148,13 +148,13 @@ class Command(BaseCommand):
     def create_average_result(self, username, sana, user_group):
         result = Result(username, sana)
 
-        result.score = statistics.median(
+        result.score = statistics.mean(
             [user.score for user in user_group])
 
-        result.content_coverage = statistics.median(
+        result.content_coverage = statistics.mean(
             [user.content_coverage for user in user_group])
 
-        result.completed_quizzes = statistics.median(
+        result.completed_quizzes = statistics.mean(
             [user.completed_quizzes for user in user_group])
 
         result.test_results = []
@@ -177,7 +177,7 @@ class Command(BaseCommand):
                         date_tests.append(test)
 
             test_scores = [test['score'] for test in date_tests]
-            median = statistics.median(test_scores)
+            median = statistics.mean(test_scores)
 
             result.test_results.append({
                 'date': datetime.combine(date, datetime.min.time()),
@@ -192,7 +192,7 @@ class Command(BaseCommand):
                         date_reactions.append(reaction_time)
 
             reaction_times = [reaction['score'] for reaction in date_reactions]
-            median = statistics.median(reaction_times)
+            median = statistics.mean(reaction_times)
 
             result.reaction_times.append({
                 'date': datetime.combine(date, datetime.min.time()),
