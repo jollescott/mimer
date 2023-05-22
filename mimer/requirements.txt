@@ -26,7 +26,7 @@ python-dateutil==2.8.1
 pytz==2019.2
 pywebpush==1.9.4
 regex==2020.1.8
-requests==2.22.0
+requests==2.31.0
 rope==0.14.0
 sana-python==0.0.1
 six==1.12.0
